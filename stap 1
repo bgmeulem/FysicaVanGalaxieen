@@ -7,3 +7,5 @@ def mass (radius):
     r = radius
     m = (r**2)/(1+r)**2
     return m
+
+Hier moet Hylke zijn deel dan komen
