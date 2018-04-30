@@ -37,7 +37,7 @@ def BindPotDer2(r):
 # Volgende definities gelden enkel op E = V_eff
 
 def EtoL(E, r):
-    L = sqrt(BindPot(r) - 2*r**2*E)
+    L = r*sqrt(2*BindPot(r) - 2*E)
     return L
 
 
