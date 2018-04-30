@@ -1,6 +1,5 @@
 import scipy.misc
-
-
+from math import sqrt
 # eerste stap: grootheden
 
 
@@ -34,3 +33,14 @@ def BindPotDer2(r):
 # tweede stap: Routines om heen en weer te gaan tussen
 # Energie E en draaimoment L, pericentrumafstand en
 # apocentrumafstand
+
+# Volgende definities gelden enkel op E = V_eff
+
+def EtoL(E, r):
+    L = sqrt(BindPot(r) - 2*r**2*E)
+    return L
+
+
+def LtoE(L, r):
+    E = (L**2)/(2*r**2) + BindPot(r)
+    return E
