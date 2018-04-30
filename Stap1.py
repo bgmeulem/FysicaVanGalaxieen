@@ -1,6 +1,9 @@
 import scipy.misc
 
 
+# eerste stap: grootheden
+
+
 def density(radius):
     import math.pi as pi
     ro = 1/((2*pi)*radius*(radius+1)**3)
@@ -26,3 +29,8 @@ def BindPotDer1(r):
 def BindPotDer2(r):
     fprime = scipy.misc.derivative(BindPot, r, n=2)
     return fprime
+
+
+# tweede stap: Routines om heen en weer te gaan tussen
+# Energie E en draaimoment L, pericentrumafstand en
+# apocentrumafstand
