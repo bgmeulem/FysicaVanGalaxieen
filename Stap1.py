@@ -1,5 +1,5 @@
 import scipy.misc
-from math import sqrt
+import numpy
 # eerste stap: grootheden
 
 
@@ -36,11 +36,28 @@ def BindPotDer2(r):
 
 # Volgende definities gelden enkel op E = V_eff
 
-def EtoL(E, r):
-    L = r*sqrt(2*BindPot(r) - 2*E)
-    return L
-
-
-def LtoE(L, r):
-    E = (L**2)/(2*r**2) + BindPot(r)
-    return E
+def aperi(E, L):
+    """ De eerste lijnen is het oplossen van de vergelijking uit 1.112 """
+    p=[2*E, 2*E-2, L**2, (L**2)]
+    aperi = numpy.roots(p)
+    i = 0
+    aperi2=[]
+    """Hier filteren we alle oplossingen die positief zijn, en dus fysisch eruit"""
+    while i<3:
+        if aperi[i]>0:
+            del aperi[i]
+            i = 3
+        i+=1
+    return(aperi)
+    """Vervolgens bepalen we welke aphelium en welke periheliumafstand is"""
+    """Eventueel kan dit herschreven worden in 2 aparte functies, een voor peri een voor aphelium"""
+    if aperi[0]>aperi[1]:
+        aphelium = aperi[0]
+        perihelium = aperi[1]
+    elif aperi[0]==aperi[1]:
+        aphelium = aperi[1]
+        perihelium = aperi[0] 
+    else:
+        aphelium = aperi2[1]
+        perihelium = aperi2[0]
+    return(perihelium, aphelium)
