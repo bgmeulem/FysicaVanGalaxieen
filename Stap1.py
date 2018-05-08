@@ -34,7 +34,6 @@ def BindPotDer2(r):
 # Energie E en draaimoment L, pericentrumafstand en
 # apocentrumafstand
 
-# Volgende definities gelden enkel op E = V_eff
 
 def aperi(E, L):
     #De eerste lijnen is het oplossen van de vergelijking uit 1.112
@@ -66,3 +65,4 @@ def L(ap, peri):
     a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1],[2*(peri**3)+2*(peri**2), peri+1]])
     b = numpy.array([2*(ap**2),2*(peri**2)])
     return(numpy.sqrt(numpy.linalg.solve(a,b)[1]))
+
