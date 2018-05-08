@@ -66,3 +66,14 @@ def L(ap, peri):
     b = numpy.array([2*(ap**2),2*(peri**2)])
     return(numpy.sqrt(numpy.linalg.solve(a,b)[1]))
 
+#Radiele periode volledig bepaald door peri-en apoheleum 
+#want men kan via peri en apo de energie en draaimoment bepalen
+def T_rad(peri, apo):
+    import scipy.integrate as integrate
+    E = E(apo, peri)
+    L = L(apo, peri)
+#integrate.quad neemt enkel functie objecten of methoden aan    
+    def functie(r):
+        return 2 / (2*(E+BindPot(r)) - L**2 /r**2)**0.5
+    
+    return integrate.quad(functie, peri, apo)[0]
