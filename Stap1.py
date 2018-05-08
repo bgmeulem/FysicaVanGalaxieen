@@ -1,5 +1,5 @@
 import scipy.misc
-from math import sqrt
+import numpy
 # eerste stap: grootheden
 
 
@@ -34,13 +34,34 @@ def BindPotDer2(r):
 # Energie E en draaimoment L, pericentrumafstand en
 # apocentrumafstand
 
-# Volgende definities gelden enkel op E = V_eff
 
-def EtoL(E, r):
-    L = r*sqrt(2*BindPot(r) - 2*E)
-    return L
+def aperi(E, L):
+    """ De eerste lijnen is het oplossen van de vergelijking uit 1.112 """
+    p = [2*E, 2*E-2, L**2, (L**2)]
+    aperi = numpy.roots(p)
+    i = 0
+    """Hier filteren we alle oplossingen die positief zijn, en dus fysisch eruit"""
+    while i < 3:
+        if aperi[i] > 0:
+            del aperi[i]
+            i = 3
+        i += 1
+    """aperi is nu een tuple van alle fysische oplossingen"""
+    return(aperi)
+    """Vervolgens bepalen we welke aphelium en welke periheliumafstand is"""
+    """Eventueel kan dit herschreven worden in 2 aparte functies, een voor peri een voor aphelium"""
 
 
-def LtoE(L, r):
-    E = (L**2)/(2*r**2) + BindPot(r)
-    return E
+def peri(E, L):
+    aper = aperi(E, L)
+    if aper[0] > aper[1]:
+        return aper[1]
+    else:
+        return aper[0]
+
+def ap(E, L):
+    aper = aperi(E, L)
+    if aper[0] > aper[1]:
+        return aper[0]
+    else:
+        return aper[1]
