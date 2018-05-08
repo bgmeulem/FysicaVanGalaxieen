@@ -56,3 +56,13 @@ def aphelium(E,L):
 def perihelium(E,L):
     aperium = list(aperi(E,L))
     return min(aperium)
+
+def E(ap, peri):
+    a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1],[2*(peri**3)+2*(peri**2), peri+1]])
+    b = numpy.array([2*(ap**2),2*(peri**2)])
+    return(numpy.linalg.solve(a,b)[0])
+
+def L(ap, peri):
+    a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1],[2*(peri**3)+2*(peri**2), peri+1]])
+    b = numpy.array([2*(ap**2),2*(peri**2)])
+    return(numpy.sqrt(numpy.linalg.solve(a,b)[1]))
