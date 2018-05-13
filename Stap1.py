@@ -109,8 +109,9 @@ def findL(E):
     L = []  # y-as
     r = 1
     for r in range(0, r_max):
-        M = (r*(1+r_max)/(r_max(1+r)))**2
-        # ingesloten massa, geschaald zodat M_tot = 1
+        M = ((r_max) / (1 + r_max))**2
+        # ingesloten massa, zou moeten gelijk zijn aan n zoals gedefinieerd
+        # boven de functie r_mass
         orb_m = (M*r)**(0.5)
         e = BindPot(r) + 1/(2*r)
         E.insert(e)[0]
@@ -119,5 +120,4 @@ def findL(E):
         # E daalt bij hogere r, vandaar insert
         r += 1
     spl = scipy.interpolate.UnivariateSpline(E, L)
-    # returnt de waarde van de fit op positie E
-    return spl.__call__(E)
+    return spl.__call__(E)  # returnt de waarde van de fit op positie E
