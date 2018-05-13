@@ -36,6 +36,7 @@ def BindPotDer2(r):
 
 
 def aperi(E, L):
+
     # De eerste lijnen is het oplossen van de vergelijking uit 1.112
     p = [2*E, 2*E-2, L**2, L**2]
     Roots = numpy.roots(p)
