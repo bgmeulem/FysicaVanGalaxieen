@@ -98,8 +98,6 @@ def T_rad(peri, apo):
 # Dus bij 99% van de totale massa is n = 0.99
 def r_mass(n):
     r_half = 1 + 2**0.5
-    # hoeveelheid massa we in rekening willen brengen, percentueel in decimalen
-    # de straal die we daarvoor nddig hebben
     r_max = ((n**0.5)*r_half) / (1 + (1 - n**0.5)*r_half)
     # bij M = 0.99 is dit ongeveer 198.5
     return r_max
