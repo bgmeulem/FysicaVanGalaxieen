@@ -98,7 +98,7 @@ def T_rad(peri, apo):
 # Dus bij 99% van de totale massa is n = 0.99
 def r_mass(n):
     r_half = 1 + 2**0.5
-    r_max = ((n**0.5)*r_half) / (1 + (1 - n**0.5)*r_half)
+    r_max = (((2*n)**0.5)*r_half) / (1 + (1 - (2*n)**0.5)*r_half)
     # bij M = 0.99 is dit ongeveer 198.5
     return r_max
 
