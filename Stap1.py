@@ -76,14 +76,14 @@ def L(ap, peri):
 # want men kan via peri en apo de energie en draaimoment bepalen
 
 
-def T_rad(peri, apo):
+def T_rad(apo, peri):
     import scipy.integrate as integrate
     E_ = E(apo, peri)
     L_ = L(apo, peri)
 # integrate.quad neemt enkel functie objecten of methoden aan
 
     def functie(r):
-        return 2 / (2*(E_ + BindPot(r)) - L_**2 / r**2)**0.5
+        return 2 / (2*(-E_ + BindPot(r)) - L_**2 / r**2)**0.5
     return integrate.quad(functie, peri, apo)[0]
 
 
@@ -91,46 +91,46 @@ def T_rad(peri, apo):
 # waiting for Triss to finish
 
 
-def BaanInt(E, L=0):
-    # maak onderscheid tussen een situatie bestaande uit
-    # enkel radiele oscillaties en werkelijke banen rondom het center
+def BaanInt (E,L=0):
+    #maak onderscheid tussen een situatie bestaande uit 
+    #enkel radiele oscillaties en werkelijke banen rondom het center
     if L != 0:
-        # introduceer de beginvoorwaarden
+        #introduceer de beginvoorwaarden
         f0 = [aphelium(E, L), 0, 0]
-        # men zal de tijd als fracties van de periode van oscillatie tussen peri en apo
-        T_ref = T_rad(perihelium(E, L), f0[0])
-
-        def baanvergelijkingen(f, t, E, L, T):
+        def baanvergelijkingen (f,t,E,L):
             r, phi, v_r = f
-            dfdt = [T*((E + BindPot(r))*2 - (L/r)**2)**0.5, T*L/r**2, T*(L**2/r**3 + BindPotDer1(r))]
+            if (-E + BindPot(r))*2 - (L/r)**2 >= 0:
+                dfdt = [ ((-E + BindPot(r))*2 - (L/r)**2)**0.5, L/r**2, (L**2/r**3 - BindPotDer1(r))]
+            else:
+                dfdt = [ (-((-E + BindPot(r))*2 - (L/r)**2))**0.5, L/r**2, (L**2/r**3 - BindPotDer1(r))]
             return dfdt
-        # men zal kijken waar de ster zich op zijn baan bevivindt gedurende 1 periode T
-        # met als tijdstapjes T/1000
-        t = numpy.linspace(0, 1, 1000)
-        from scipy.integrate import odeint
-        oplossingen = odeint(baanvergelijkingen, f0, t, args=(E, L, T_ref))
-
-    # nu hetzelfde maar in het geval van L = 0
-    else:
-        # in dit geval geldt onze formule voor T_rad niet, eerst bepaalt men deze dus
-        def PeriodFunky(r):
-            return 1/((E+BindPot(r))*2)**0.5
-        import scipy.integrate as integrate
-        T_ref = 4*integrate.quad(PeriodFunky, 0, (1/E)-1)[0]
-
-        # nu hetzelfde verhaal als hierboven
-        f0 = [(1/E)-1, 0, 0]
         
-        def baanvergelijkingen(f, t, E, L, T):
-            r, phi, v_r = f
-            dfdt = [T*((E + BindPot(r))*2)**0.5, 0, T*(BindPotDer1(r))]
-            return dfdt
-        t = numpy.linspace(0, 1, 1000)
+        #men zal kijken waar de ster zich op zijn baan bevivindt gedurende 1 periode T
+        #met als tijdstapjes T/80
+        t = numpy.linspace(0, T_rad(perihelium(E, L) , f0[0]), 81)
         from scipy.integrate import odeint
-        oplossingen = odeint(baanvergelijkingen, f0, t, args=(E, L, T_ref))
-    return oplossingen
-
-
+        oplossingen = odeint(baanvergelijkingen, f0, t, args= (E,L))
+        
+    #nu hetzelfde maar in het geval van L = 0
+    else:
+    #in dit geval geldt onze formule voor T_rad niet, eerst bepaalt men deze dus
+        def PeriodFunky(r):
+            return 1/((-E+BindPot(r))*2)**0.5
+        import scipy.integrate as integrate
+        
+        #nu hetzelfde verhaal als hierboven
+        f0 = [(1/E)-1, 0, 0]
+        def baanvergelijkingen (f,t,E,L):
+            r, phi, v_r = f
+            dfdt = [max(0,((E + BindPot(r))*2)**0.5), 0, (-BindPotDer1(r))]
+            return dfdt
+        t = numpy.linspace(0,  4*integrate.quad(PeriodFunky, 0, (1/-E)-1)[0], 81)
+        from scipy.integrate import odeint
+        oplossingen = odeint(baanvergelijkingen, f0, t, args= (E,L))
+        
+    return oplossingen 
+        
+        
 # Stap 4: voor verschillende r'en de E en L berekenen
 # Dan een fit maken zodat men voor willekeurige E de L weet
 
@@ -159,5 +159,22 @@ def findL(E):
         L.insert(orb_m)[0]
         # E moet in stijgende volgorde zijn voor de komende plotfunctie
         # E daalt bij hogere r, vandaar insert
-    spl = scipy.interpolate.UnivariateSpline(E, L)
+    from scipy import interpolate
+    spl = interpolate.UnivariateSpline(E, L)
     return spl.__call__(E)  # returnt de waarde van de fit op positie E
+
+print(E(1.5,0.5))
+print(L(1.5,0.5))
+print(aphelium(0.366666666667, 0.387298334621))
+print(perihelium(0.366666666667, 0.387298334621))
+print(T_rad(0.5, 1.5))
+
+print(BaanInt(0.366666666667, 0.387298334621))
+'''import matplotlib.pyplot as plt
+plt.plot(t, sol[:, 0], 'b', label='radius(t)')
+plt.plot(t, sol[:, 1], 'g', label='angle(t)')
+plt.plot(t, sol[:, 2], 'r', label='radial velocity(t)')
+plt.legend(loc='best')
+plt.xlabel('t')
+plt.grid()
+plt.show()'''
