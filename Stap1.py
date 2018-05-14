@@ -91,45 +91,46 @@ def T_rad(peri, apo):
 # waiting for Triss to finish
 
 
-def BaanInt (E,L=0):
-    #maak onderscheid tussen een situatie bestaande uit 
-    #enkel radiele oscillaties en werkelijke banen rondom het center
+def BaanInt(E, L=0):
+    # maak onderscheid tussen een situatie bestaande uit
+    # enkel radiele oscillaties en werkelijke banen rondom het center
     if L != 0:
-        #introduceer de beginvoorwaarden
+        # introduceer de beginvoorwaarden
         f0 = [aphelium(E, L), 0, 0]
-        #men zal de tijd als fracties van de periode van oscillatie tussen peri en apo
-        T_ref = T_rad(perihelium(E, L) , f0[0])
-        def baanvergelijkingen (f,t,E,L,T):
+        # men zal de tijd als fracties van de periode van oscillatie tussen peri en apo
+        T_ref = T_rad(perihelium(E, L), f0[0])
+
+        def baanvergelijkingen(f, t, E, L, T):
             r, phi, v_r = f
             dfdt = [T*((E + BindPot(r))*2 - (L/r)**2)**0.5, T*L/r**2, T*(L**2/r**3 + BindPotDer1(r))]
             return dfdt
-        
-        #men zal kijken waar de ster zich op zijn baan bevivindt gedurende 1 periode T
-        #met als tijdstapjes T/1000
+        # men zal kijken waar de ster zich op zijn baan bevivindt gedurende 1 periode T
+        # met als tijdstapjes T/1000
         t = numpy.linspace(0, 1, 1000)
         from scipy.integrate import odeint
-        oplossingen = odeint(baanvergelijkingen, f0, t, args= (E,L, T_ref))
-        
-    #nu hetzelfde maar in het geval van L = 0
+        oplossingen = odeint(baanvergelijkingen, f0, t, args=(E, L, T_ref))
+
+    # nu hetzelfde maar in het geval van L = 0
     else:
-    #in dit geval geldt onze formule voor T_rad niet, eerst bepaalt men deze dus
+        # in dit geval geldt onze formule voor T_rad niet, eerst bepaalt men deze dus
         def PeriodFunky(r):
             return 1/((E+BindPot(r))*2)**0.5
         import scipy.integrate as integrate
-        T_ref =  4*integrate.quad(PeriodFunky, 0, (1/E)-1)[0]
-        
-        #nu hetzelfde verhaal als hierboven
+        T_ref = 4*integrate.quad(PeriodFunky, 0, (1/E)-1)[0]
+
+        # nu hetzelfde verhaal als hierboven
         f0 = [(1/E)-1, 0, 0]
-        def baanvergelijkingen (f,t,E,L,T):
+        
+        def baanvergelijkingen(f, t, E, L, T):
             r, phi, v_r = f
             dfdt = [T*((E + BindPot(r))*2)**0.5, 0, T*(BindPotDer1(r))]
             return dfdt
         t = numpy.linspace(0, 1, 1000)
         from scipy.integrate import odeint
-        oplossingen = odeint(baanvergelijkingen, f0, t, args= (E,L, T_ref))
+        oplossingen = odeint(baanvergelijkingen, f0, t, args=(E, L, T_ref))
     return oplossingen
-        
-        
+
+
 # Stap 4: voor verschillende r'en de E en L berekenen
 # Dan een fit maken zodat men voor willekeurige E de L weet
 
