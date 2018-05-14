@@ -1,5 +1,6 @@
 import scipy.misc
 import numpy
+from scipy.optimize.nonlin import LowRankMatrix
 # eerste stap: grootheden
 
 
@@ -61,13 +62,13 @@ def perihelium(E, L):
     return min(aperium)
 
 
-def E(ap, peri):
+def energie(ap, peri):
     a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1], [2*(peri**3)+2*(peri**2), peri + 1]])
     b = numpy.array([2*(ap**2), 2*(peri**2)])
     return(numpy.linalg.solve(a, b)[0])
 
 
-def L(ap, peri):
+def draaimoment(ap, peri):
     a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1], [2*(peri**3)+2*(peri**2), peri + 1]])
     b = numpy.array([2*(ap**2), 2*(peri**2)])
     return(numpy.sqrt(numpy.linalg.solve(a, b)[1]))
@@ -78,59 +79,50 @@ def L(ap, peri):
 
 def T_rad(apo, peri):
     import scipy.integrate as integrate
-    E_ = E(apo, peri)
-    L_ = L(apo, peri)
+    E = energie(apo, peri)
+    L = draaimoment(apo, peri)
 # integrate.quad neemt enkel functie objecten of methoden aan
-
     def functie(r):
-        return 2 / (2*(-E_ + BindPot(r)) - L_**2 / r**2)**0.5
-    return integrate.quad(functie, peri, apo)[0]
+        return 2 / (2*(-E + BindPot(r)) - L**2 / r**2)**0.5
 
+    return integrate.quad(functie, peri, apo)[0]
 
 # Stap 3: Rosettebanen integreren
 # waiting for Triss to finish
 
 
-def BaanInt (E,L=0):
+def BaanInt (apo, peri):
     #maak onderscheid tussen een situatie bestaande uit 
     #enkel radiele oscillaties en werkelijke banen rondom het center
+    L = draaimoment(apo, peri)
     if L != 0:
         #introduceer de beginvoorwaarden
-        f0 = [aphelium(E, L), 0, 0]
-        def baanvergelijkingen (f,t,E,L):
+        f0 = [apo, 0, 0]
+        def baanvergelijkingen (f,t,L):
             r, phi, v_r = f
-            if (-E + BindPot(r))*2 - (L/r)**2 >= 0:
-                dfdt = [ ((-E + BindPot(r))*2 - (L/r)**2)**0.5, L/r**2, (L**2/r**3 - BindPotDer1(r))]
-            else:
-                dfdt = [ (-((-E + BindPot(r))*2 - (L/r)**2))**0.5, L/r**2, (L**2/r**3 - BindPotDer1(r))]
+            dfdt = [ v_r, L/r**2, (L**2/r**3 + BindPotDer1(r))]
             return dfdt
         
         #men zal kijken waar de ster zich op zijn baan bevivindt gedurende 1 periode T
         #met als tijdstapjes T/80
-        t = numpy.linspace(0, T_rad(perihelium(E, L) , f0[0]), 81)
+        t = numpy.linspace(0, T_rad(peri , apo), 82)
         from scipy.integrate import odeint
-        oplossingen = odeint(baanvergelijkingen, f0, t, args= (E,L))
+        oplossingen = odeint(baanvergelijkingen, f0, t, args= (L,))
         
     #nu hetzelfde maar in het geval van L = 0
     else:
     #in dit geval geldt onze formule voor T_rad niet, eerst bepaalt men deze dus
-        def PeriodFunky(r):
-            return 1/((-E+BindPot(r))*2)**0.5
-        import scipy.integrate as integrate
-        
+                
         #nu hetzelfde verhaal als hierboven
-        f0 = [(1/E)-1, 0, 0]
         def baanvergelijkingen (f,t,E,L):
             r, phi, v_r = f
-            dfdt = [max(0,((E + BindPot(r))*2)**0.5), 0, (-BindPotDer1(r))]
+            dfdt = [v_r, 0, BindPotDer1(r)]
             return dfdt
-        t = numpy.linspace(0,  4*integrate.quad(PeriodFunky, 0, (1/-E)-1)[0], 81)
+        t = numpy.linspace(0,  T_rad(apo, peri), 82)
         from scipy.integrate import odeint
-        oplossingen = odeint(baanvergelijkingen, f0, t, args= (E,L))
+        oplossingen = odeint(baanvergelijkingen, f0, t, args= (L,))
         
-    return oplossingen 
-        
-        
+    return oplossingen       
 # Stap 4: voor verschillende r'en de E en L berekenen
 # Dan een fit maken zodat men voor willekeurige E de L weet
 
@@ -163,17 +155,18 @@ def findL(E):
     spl = interpolate.UnivariateSpline(E, L)
     return spl.__call__(E)  # returnt de waarde van de fit op positie E
 
-print(E(1.5,0.5))
-print(L(1.5,0.5))
+print(energie(1.5,0.5))
+print(draaimoment(1.5,0.5))
 print(aphelium(0.366666666667, 0.387298334621))
 print(perihelium(0.366666666667, 0.387298334621))
-print(T_rad(0.5, 1.5))
-
-print(BaanInt(0.366666666667, 0.387298334621))
+print(T_rad(1.5, 0.5))
+test = BaanInt(1.5, 0.5)
+t = numpy.linspace(0, 9.145870544399036 , 81)
+print(test)
 '''import matplotlib.pyplot as plt
-plt.plot(t, sol[:, 0], 'b', label='radius(t)')
-plt.plot(t, sol[:, 1], 'g', label='angle(t)')
-plt.plot(t, sol[:, 2], 'r', label='radial velocity(t)')
+plt.plot(t, test[:, 0], 'b', label='radius(t)')
+plt.plot(t, test[:, 1], 'g', label='angle(t)')
+plt.plot(t, test[:, 2], 'r', label='radial velocity(t)')
 plt.legend(loc='best')
 plt.xlabel('t')
 plt.grid()
