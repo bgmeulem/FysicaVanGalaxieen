@@ -22,13 +22,11 @@ def BindPot(r):
 
 
 def BindPotDer1(r):
-    fprime = scipy.misc.derivative(BindPot, r)
-    return fprime
+    return -1/((r+1)**2)
 
 
 def BindPotDer2(r):
-    fprime = scipy.misc.derivative(BindPot, r, n=2)
-    return fprime
+    return 2/((r+1)**2)
 
 
 # tweede stap: Routines om heen en weer te gaan tussen
@@ -83,7 +81,7 @@ def T_rad(apo, peri):
     L = draaimoment(apo, peri)
 # integrate.quad neemt enkel functie objecten of methoden aan
     def functie(r):
-        return 2 / (2*(-E + BindPot(r)) - L**2 / r**2)**0.5
+        return 2 / (2*(-E + BindPot(r)) - (L**2 / r**2))**0.5
 
     return integrate.quad(functie, peri, apo)[0]
 
@@ -100,12 +98,12 @@ def BaanInt (apo, peri):
         f0 = [apo, 0, 0]
         def baanvergelijkingen (f,t,L):
             r, phi, v_r = f
-            dfdt = [ v_r, L/r**2, (L**2/r**3 + BindPotDer1(r))]
+            dfdt = [ v_r, -L/(r**2), (((-L**2)/(r**3)) + BindPotDer1(r))]
             return dfdt
         
         #men zal kijken waar de ster zich op zijn baan bevivindt gedurende 1 periode T
         #met als tijdstapjes T/80
-        t = numpy.linspace(0, T_rad(peri , apo), 82)
+        t = numpy.linspace(0, T_rad(peri , apo), 81)
         from scipy.integrate import odeint
         oplossingen = odeint(baanvergelijkingen, f0, t, args= (L,))
         
@@ -118,7 +116,7 @@ def BaanInt (apo, peri):
             r, phi, v_r = f
             dfdt = [v_r, 0, BindPotDer1(r)]
             return dfdt
-        t = numpy.linspace(0,  T_rad(apo, peri), 82)
+        t = numpy.linspace(0,  T_rad(apo, peri), 81)
         from scipy.integrate import odeint
         oplossingen = odeint(baanvergelijkingen, f0, t, args= (L,))
         
