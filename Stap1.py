@@ -1,6 +1,7 @@
 import numpy
 from scipy.integrate import odeint
-from scipy.optimize import fmin, brentq
+from scipy.optimize import fmin
+from scipy.optimize import brentq
 import matplotlib.pyplot as plt
 from scipy import interpolate
 # eerste stap: grootheden
@@ -46,14 +47,13 @@ def BindPotDer2(r):
 def aperi(E, L):
     def f(r):
         return ((L**2)/(2*r**2) - BindPot(r) + E)
-    minimum = fmin(f, 10)
-    print(minimum[0])
+    minimum = fmin(f, 0.1)
     aperi = []
-    aperi.append(scipy.optimize.brentq(f, 0.01, minimum[0]))
+    aperi.append(brentq(f, 0.01, minimum[0]))
     if 10**(-3) < minimum < 10**3:
         # cirkelbaan
         return aperi
-    aperi.append(scipy.optimize.brentq(f, minimum[0], r_mass(0.99)))
+    aperi.append(brentq(f, minimum[0], r_mass(0.99)))
     return aperi
 # Volgende functies geven minimum en maximum oplossing van 1.112
 
