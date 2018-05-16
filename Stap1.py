@@ -45,16 +45,22 @@ def BindPotDer2(r):
 
 
 def aperi(E, L):
+    E = 0.05
+    L = 7.13645730608238
+
     def f(r):
-        return ((L**2)/(2*r**2) - BindPot(r) + E)
+        return ((L**2)/(2*r**2) - BindPot(r))
     minimum = fmin(f, 0.1)
-    aperi = []
-    aperi.append(brentq(f, 0.01, minimum[0]))
-    if 10**(-3) < minimum < 10**3:
+    aperi_list = []
+    print(minimum)
+    print(f(minimum[0]))
+    if 10**(-3) < f(minimum[0]) < 10**3:
         # cirkelbaan
+        aperi.append(minimum[0])
         return aperi
-    aperi.append(brentq(f, minimum[0], r_mass(0.99)))
-    return aperi
+    aperi_list.append(float(brentq(f, 0.01, minimum[0])))
+    aperi_list.append(float(brentq(f, minimum[0], r_mass(0.99))))
+    return aperi_list
 # Volgende functies geven minimum en maximum oplossing van 1.112
 
 
@@ -202,14 +208,10 @@ def rad_distr(r_max, i=100):
     interval = interval_r(r_mass(0.99), i)
     # een interval opgesteld van 0 tot r_max in 100 stukjes
     sterren_fractie = []
-    for e in frange(0.05, 1.05, 0.05):
+    for e in frange():
         # E gaat van 0 naar 1, delen we op in stapjes van 20
-        # nu komt voor elk 1/20e van de Energie een interval overeen van
-        # mogelijke L'en. Deze delen we ook op in 20 stukjes, genoemd m:
-        L_begin = findL(e)
-        L_eind = findL(e + 1/20 - 1/400)
         # we hebben de L nodig vlak voor de volgende e (e + 1/20)
-        for l in frange(L_begin, L_eind + L_eind/20, (L_begin - L_eind)/20):
+        for l in frange():
             # eerste e is altijd een cirkelbaan, omdat de functie findL
             # werkt met een fit voor cirkelbanen. L verhoogt hierna
             # dus geen cirkelbanen meer
@@ -244,12 +246,10 @@ def rad_distr(r_max, i=100):
                     fractie[i] += T_rad(apo, peri)/81
                 sterren_fractie.append(fractie)
                 # deze lijst wordt toegevoegd aan de totale lijst genaamd
-                # sterren_fractie. Elke 20 waarden komen overeen met 1 E-waard
+                # sterren_fractie. Elke 20 waarden komen overeen met 1 E-waarde
                 # en 20 verschillende L-waarden. Deze lijst zou 400 elementen
                 # moeten bevatten
-    print(sterren_fractie)
     return sterren_fractie
-
 
 
 print(energie(1.5, 0.5))
