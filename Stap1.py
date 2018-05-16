@@ -2,10 +2,8 @@ import numpy
 from scipy.integrate import odeint
 from scipy.optimize import fmin
 from scipy.optimize import brentq
-import matplotlib.pyplot as plt
 from scipy import interpolate
 # eerste stap: grootheden
-
 
 # kleine range functie voor floats
 def frange(x, y, jump):
@@ -88,7 +86,7 @@ def draaimoment(ap, peri):
 # Radiele periode volledig bepaald door peri-en apoheleum
 # want men kan via peri en apo de energie en draaimoment bepalen
 
-
+#in deze functie zit ook nog de periode voor een cirkelbaan, dit om de dingen wat te bundelen
 def T_rad(apo, peri):
     import scipy.integrate as integrate
     E = energie(apo, peri)
@@ -97,44 +95,85 @@ def T_rad(apo, peri):
 
     def functie(r):
         return 2 / (2*(-E + BindPot(r)) - (L**2 / r**2))**0.5
-    return abs(integrate.quad(functie, peri, apo)[0])
+    return abs(integrate.quad(functie, peri, apo)[0]) if peri != apo != 0 else numpy.pi*2*apo**2/L 
 
 # Stap 3: Rosettebanen integreren
-# waiting for Triss to finish
 
-
-def BaanInt(apo, peri):
-    # maak onderscheid tussen een situatie bestaande uit
-    # enkel radiele oscillaties en werkelijke banen rondom het center
+def BaanInt(apo, peri, stapjes=81):
     L = draaimoment(apo, peri)
-    if L > 10**(-5):
-        # L is niet 0
-        # introduceer de beginvoorwaarden
-        f0 = [apo, 0, 0]
+#Er zijn 4 gevallen waarin onderscheid moet gemaakt worden nl. cirkelbanen, radiele oscillaties,
+#sterren stil staand in het centrum en dan nog de banen die zowel rond het centrum gaan als radiele bewegen
 
+#De standaard banen: 0<peri, 0<apo en L>0
+    if L > 10**(-5):    
+#De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt van de snelheid dus is v_r = 0
+        f0 = [apo, 0, 0]
         def baanvergelijkingen(f, t, L):
             r, phi, v_r = f
             dfdt = [v_r, L/(r**2), (((L**2)/(r**3)) + BindPotDer1(r))]
             return dfdt
-
-        # men zal kijken waar de ster zich op zijn baan bevivindt gedurende 1 periode T
-        # met als tijdstapjes T/80
-        t = numpy.linspace(0, T_rad(peri, apo), 81)
+#Men zal een periode bekijken in gelijke stapjes
+        t = numpy.linspace(0, T_rad(peri, apo), stapjes)
         oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
 
-    # nu hetzelfde maar in het geval van L = 0
+#De ster staat stil in het centrum: peri=apo=o, L=0  
+    elif peri == apo == 0:
+#De ster staat stil en beweegt niet en heeft een periode die oneindig groot is
+        f0 = [0, 0, 0]
+        oplossingen = [f0 for k in range(0,stapjes)]
+
+#De ster beweegt op cirkelbanen: peri=apo>0 en L > 0, er moet niet meer gekeken worden of deze niet 0 zijn, dit is hiervoor reeds gebeurt
+    elif peri == apo:
+#Men zal nu niet meer de radiele periode moeten volgen maar circulaire periode
+#Hier zal enkel de hoek veranderen
+        periode = T_rad(apo, peri)
+        f0 = [apo, 0, 0]
+        def baanvergelijkingen(f, t, L):
+            r, phi, v_r = f
+            dfdt = [0, L/(r**2), 0]
+            return dfdt
+        t = numpy.linspace(0, periode, stapjes)
+        oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
+        
+#De laatste beweging wordt opgesplitst in 2 delen nl. van apo naar centrum
+#en van centrum terug naar apo maar aan de andere kant van het centrum
     else:
-        # in dit geval geldt onze formule voor T_rad niet, eerst bepaalt men
-        # deze dus
-        # nu hetzelfde verhaal als hierboven
-        def baanvergelijkingen(f, t, E, L):
+#Deel 1: van apo naar centrum
+        periode = T_rad(apo, peri)/2
+        f0 = [apo, 0, 0]
+        def baanvergelijkingen(f, t, L):
             r, phi, v_r = f
             dfdt = [v_r, 0, BindPotDer1(r)]
             return dfdt
-        t = numpy.linspace(0,  T_rad(apo, peri), 81)
-        oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
-    return oplossingen
+        t1 = numpy.linspace(0,  periode, stapjes//2)
+        oplossingen1 = odeint(baanvergelijkingen, f0, t, args=(L,))
+        
+#Deel 2: van centrum naar apo        
+        f0 = [0, numpy.pi, -oplossingen1[-1][2]]
+        def baanvergelijkingen(f, t, L):
+            r, phi, v_r = f
+            dfdt = [v_r, 0, BindPotDer1(r)]
+            return dfdt
+        t2 = numpy.linspace(periode, 2*periode, stapjes//2)
+        oplossingen2 = odeint(baanvergelijkingen, f0, t, args=(L,))
 
+#Combinatie van de 2 delen
+        oplossingen = oplossingen1 + oplossingen2
+        t = t1 + t2
+
+#De gevonden oplossingen en de time stamp worden nu elk in afzonderlijke sublijsten gestoken van 1 mainlijst
+#Deze ziet er als volgt uit [[tijd][radius][hoek][radiele snelheid]]
+
+    tijd, radius, hoek, radiele_snelheid = [], [], [], []
+    for element in range(0, stapjes):
+        tijd.append(t[element])
+        radius.append(element)
+        hoek.append(element)
+        radiele_snelheid.append(element)
+    return [tijd, radius, hoek, radiele_snelheid]
+
+    
+ 
 # Stap 4: voor verschillende r'en de E en L berekenen
 # Dan een fit maken zodat men voor willekeurige E de L weet
 
@@ -261,6 +300,7 @@ test = BaanInt(1.5, 0.5)
 # print(test)
 t = numpy.linspace(0, 9.145870544399036, 81)
 
-plt.plot(t, test[:, 0], 'b', label='radius(t)')
+"""plt.plot(t, test[:, 0], 'b', label='radius(t)')
 plt.plot(t, test[:, 1], 'g', label='angle(t)')
 plt.plot(t, test[:, 2], 'r', label='radial velocity(t)')
+"""
