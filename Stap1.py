@@ -68,9 +68,10 @@ def perihelium(E, L):
     return min(aperium)
 
 
-def energie(ap, peri):
-    if ap == peri:
-        return(BindPot(ap) - mass(ap)/(2*ap))
+def energie(ap, peri=0):
+    if not peri:
+        E = (BindPot(ap) - mass(ap)/(2*ap))
+        return E
     else:
         a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1], [2*(peri**3)+2*(peri**2), peri + 1]])
         b = numpy.array([2*(ap**2), 2*(peri**2)])
@@ -78,8 +79,8 @@ def energie(ap, peri):
     
 
 
-def draaimoment(ap, peri):
-    if ap == peri:
+def draaimoment(ap, peri=0):
+    if not peri:
         return ((mass(ap)*ap)**(0.5))
     else:
         a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1], [2*(peri**3)+2*(peri**2), peri + 1]])
@@ -198,16 +199,12 @@ def r_mass(n):
     return r_max
 
 
-def ListELcouples(r_max, r_begin=0):
+def ListELcouples(r_max):
     E = []
     L = []
-    for r in frange(r_begin + (r_max - r_begin)/1000, r_max + (r_max - r_begin)/1000, (r_max - r_begin)/1000):
-        if r_begin:
-            M = mass(r_max) - mass(r_begin)
-        else:
-            M = mass(r_max)
-        orb_mom = (M*r)**(0.5)
-        e = BindPot(r) + M/(2*r)
+    for r in numpy.linspace(r_max/1000, r_max, 1000):
+        orb_mom = draaimoment(r)
+        e = energie(r)
         E.insert(0, e)
         L.insert(0, orb_mom)
         # E moet in stijgende volgorde zijn voor de komende plotfunctie
@@ -215,7 +212,9 @@ def ListELcouples(r_max, r_begin=0):
     return [E, L]
     # returnt een lijst met als eerste element een lijst van alle E waarden
     # en als tweede de L-waarden
-
+print(ListELcouples(200))
+print(draaimoment(100))
+print(energie(100))
 
 def findL(E):
     r_max = r_mass(0.99)  # 99% van de totale massa wordt beschouwd
@@ -226,7 +225,7 @@ def findL(E):
     # plt.plot(E_list, L_list)
     # plot neemt kwadratisch af naar 0, zoals het hoort
     return spl.__call__(E)  # returnt de waarde van de fit op positie E
-
+print(findL(energie(100)))
 # Stap 5: interval 0:r_max opdelen in gelijke intervallen
 # Massatoename berekenen
 # Integraalruimte opdelen in grid (E_k, L_k)
