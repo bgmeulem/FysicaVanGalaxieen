@@ -2,7 +2,7 @@ import numpy
 from scipy.integrate import odeint
 from scipy.optimize import fmin
 from scipy.optimize import brentq
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from scipy import interpolate
 # eerste stap: grootheden
 
@@ -43,26 +43,20 @@ def BindPotDer2(r):
 # Energie E en draaimoment L, pericentrumafstand en
 # apocentrumafstand
 
-
 def aperi(E, L):
-    E = 0.05
-    L = 7.13645730608238
-
     def f(r):
-        return ((L**2)/(2*r**2) - BindPot(r))
+        return ((L**2)/(2*r**2) - BindPot(r) + E)
     minimum = fmin(f, 0.1)
-    aperi_list = []
-    print(minimum)
-    print(f(minimum[0]))
-    if 10**(-3) < f(minimum[0]) < 10**3:
+    aperi = []
+    aperi.append(brentq(f, 0.01, minimum[0]))
+    if -10**(-3) < f(minimum[0]) < 10**(-3):
         # cirkelbaan
         aperi.append(minimum[0])
         return aperi
-    aperi_list.append(float(brentq(f, 0.01, minimum[0])))
-    aperi_list.append(float(brentq(f, minimum[0], r_mass(0.99))))
-    return aperi_list
-# Volgende functies geven minimum en maximum oplossing van 1.112
+    aperi.append(brentq(f, minimum[0], r_mass(0.99)))
+    return aperi
 
+# Volgende functies geven minimum en maximum oplossing van 1.112
 
 def aphelium(E, L):
     aperium = list(aperi(E, L))
@@ -188,7 +182,7 @@ def interval_r(r_max, n):
     r_part = []
     i = 0
     while i <= r_max:
-        r_part.append(n)
+        r_part.append(i)
         i += r_max/n
     return r_part
 
@@ -203,18 +197,14 @@ def mass_increase(r1, r2):
 def rad_distr(r_max, i=100):
     i = 100
     # i is het aantal delen dat we de r_max opdelen
-    # Energie gaat van 1 (r = 0) naar 0 (r = oneindig)
-    # delen we deze op in 50 stukjes:
     interval = interval_r(r_mass(0.99), i)
     # een interval opgesteld van 0 tot r_max in 100 stukjes
     sterren_fractie = []
-    for e in frange():
+    for e in numpy.linspace(0,1,20):
         # E gaat van 0 naar 1, delen we op in stapjes van 20
         # we hebben de L nodig vlak voor de volgende e (e + 1/20)
-        for l in frange():
-            # eerste e is altijd een cirkelbaan, omdat de functie findL
-            # werkt met een fit voor cirkelbanen. L verhoogt hierna
-            # dus geen cirkelbanen meer
+        for l in frange(0, findL(e), 20):
+            # Draaimoment bij cirkelbaan is steeds de maximale voor een bepaalde energie
             apo = aphelium(e, l)
             peri = perihelium(e, l)
             baan_rad = BaanInt(apo, peri)[0]
@@ -251,16 +241,16 @@ def rad_distr(r_max, i=100):
                 # moeten bevatten
     return sterren_fractie
 
-
 print(energie(1.5, 0.5))
 print(draaimoment(1.5, 0.5))
 print(aphelium(0.366666666667, 0.387298334621))
 print(perihelium(0.366666666667, 0.387298334621))
 # print(T_rad(1.5, 0.5))
 test = BaanInt(1.5, 0.5)
-# print(test)
+print(test)
+rad_distr(r_mass(0.99))
 t = numpy.linspace(0, 9.145870544399036, 81)
 
-plt.plot(t, test[:, 0], 'b', label='radius(t)')
-plt.plot(t, test[:, 1], 'g', label='angle(t)')
-plt.plot(t, test[:, 2], 'r', label='radial velocity(t)')
+#plt.plot(t, test[:, 0], 'b', label='radius(t)')
+#plt.plot(t, test[:, 1], 'g', label='angle(t)')
+#plt.plot(t, test[:, 2], 'r', label='radial velocity(t)')
