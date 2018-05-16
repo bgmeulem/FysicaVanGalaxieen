@@ -102,8 +102,10 @@ def T_rad(apo, peri):
 
 # Stap 3: Rosettebanen integreren
 
-def BaanInt(apo, peri, stapjes=81):
+def BaanInt(apo, peri, stapjes=80):
     L = draaimoment(apo, peri)
+#stapjes moet een even getal zijn want bij radiele oscillatie wordt dit in 2 gesplitst
+    stapjes = (stapjes//2)*2
 #Er zijn 4 gevallen waarin onderscheid moet gemaakt worden nl. cirkelbanen, radiele oscillaties,
 #sterren stil staand in het centrum en dan nog de banen die zowel rond het centrum gaan als radiele bewegen
 
@@ -123,7 +125,11 @@ def BaanInt(apo, peri, stapjes=81):
     elif peri == apo == 0:
 #De ster staat stil en beweegt niet en heeft een periode die oneindig groot is
         f0 = [0, 0, 0]
-        oplossingen = [f0 for k in range(0,stapjes)]
+        t = []
+        oplossingen = []
+        for k in range(0,stapjes):
+            t.append(k)
+            oplossingen.append(f0)
 
 #De ster beweegt op cirkelbanen: peri=apo>0 en L > 0, er moet niet meer gekeken worden of deze niet 0 zijn, dit is hiervoor reeds gebeurt
     elif peri == apo:
@@ -149,7 +155,7 @@ def BaanInt(apo, peri, stapjes=81):
             dfdt = [v_r, 0, BindPotDer1(r)]
             return dfdt
         t1 = numpy.linspace(0,  periode, stapjes//2)
-        oplossingen1 = odeint(baanvergelijkingen, f0, t, args=(L,))
+        oplossingen1 = odeint(baanvergelijkingen, f0, t1, args=(L,))
         
 #Deel 2: van centrum naar apo        
         f0 = [0, numpy.pi, -oplossingen1[-1][2]]
@@ -158,11 +164,11 @@ def BaanInt(apo, peri, stapjes=81):
             dfdt = [v_r, 0, BindPotDer1(r)]
             return dfdt
         t2 = numpy.linspace(periode, 2*periode, stapjes//2)
-        oplossingen2 = odeint(baanvergelijkingen, f0, t, args=(L,))
+        oplossingen2 = odeint(baanvergelijkingen, f0, t2, args=(L,))
 
 #Combinatie van de 2 delen
-        oplossingen = oplossingen1 + oplossingen2
-        t = t1 + t2
+        oplossingen = oplossingen1.tolist() + oplossingen2.tolist()
+        t = t1.tolist() + t2.tolist()
 
 #De gevonden oplossingen en de time stamp worden nu elk in afzonderlijke sublijsten gestoken van 1 mainlijst
 #Deze ziet er als volgt uit [[tijd][radius][hoek][radiele snelheid]]
@@ -170,9 +176,9 @@ def BaanInt(apo, peri, stapjes=81):
     tijd, radius, hoek, radiele_snelheid = [], [], [], []
     for element in range(0, stapjes):
         tijd.append(t[element])
-        radius.append(element)
-        hoek.append(element)
-        radiele_snelheid.append(element)
+        radius.append(oplossingen[element][0])
+        hoek.append(oplossingen[element][1])
+        radiele_snelheid.append(oplossingen[element][2])
     return [tijd, radius, hoek, radiele_snelheid]
 
     
@@ -289,12 +295,11 @@ def rad_distr(r_max, i=100):
                 # moeten bevatten
     return sterren_fractie
 
-print(energie(1.49, 1.5))
-print(draaimoment(1.49999999, 1.5))
-print(energie(1.5, 1.5))
-print(draaimoment(1.5, 1.5))
-# print(T_rad(1.5, 0.5))
-print(findL(0))
-#plt.plot(t, test[:, 0], 'b', label='radius(t)')
-#plt.plot(t, test[:, 1], 'g', label='angle(t)')
-#plt.plot(t, test[:, 2], 'r', label='radial velocity(t)')
+#t, radius, hoek, snelheid = BaanInt(0, 0)
+#plt.plot(t, radius, 'b', label='radius(t)')
+#plt.plot(t, hoek, 'g', label='angle(t)')
+#plt.plot(t, snelheid, 'r', label='radial velocity(t)')
+#plt.legend(loc='best')
+#plt.xlabel('t')
+#plt.grid()
+#plt.show()
