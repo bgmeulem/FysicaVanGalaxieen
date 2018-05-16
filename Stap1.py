@@ -69,15 +69,22 @@ def perihelium(E, L):
 
 
 def energie(ap, peri):
-    a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1], [2*(peri**3)+2*(peri**2), peri + 1]])
-    b = numpy.array([2*(ap**2), 2*(peri**2)])
-    return(numpy.linalg.solve(a, b)[0])
+    if ap == peri:
+        return(BindPot(ap) - mass(ap)/(2*ap))
+    else:
+        a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1], [2*(peri**3)+2*(peri**2), peri + 1]])
+        b = numpy.array([2*(ap**2), 2*(peri**2)])
+        return(numpy.linalg.solve(a, b)[0])
+    
 
 
 def draaimoment(ap, peri):
-    a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1], [2*(peri**3)+2*(peri**2), peri + 1]])
-    b = numpy.array([2*(ap**2), 2*(peri**2)])
-    return(numpy.sqrt(numpy.linalg.solve(a, b)[1]))
+    if ap == peri:
+        return ((mass(ap)*ap)**(0.5))
+    else:
+        a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1], [2*(peri**3)+2*(peri**2), peri + 1]])
+        b = numpy.array([2*(ap**2), 2*(peri**2)])
+        return(numpy.sqrt(numpy.linalg.solve(a, b)[1]))
 
 # Radiele periode volledig bepaald door peri-en apoheleum
 # want men kan via peri en apo de energie en draaimoment bepalen
@@ -241,15 +248,12 @@ def rad_distr(r_max, i=100):
                 # moeten bevatten
     return sterren_fractie
 
-print(energie(1.5, 0.5))
-print(draaimoment(1.5, 0.5))
-print(aphelium(0.366666666667, 0.387298334621))
-print(perihelium(0.366666666667, 0.387298334621))
+print(energie(1.49, 1.5))
+print(draaimoment(1.49999999, 1.5))
+print(energie(1.5, 1.5))
+print(draaimoment(1.5, 1.5))
 # print(T_rad(1.5, 0.5))
-test = BaanInt(1.5, 0.5)
-print(test)
-rad_distr(r_mass(0.99))
-t = numpy.linspace(0, 9.145870544399036, 81)
+print(findL(0))
 
 #plt.plot(t, test[:, 0], 'b', label='radius(t)')
 #plt.plot(t, test[:, 1], 'g', label='angle(t)')
