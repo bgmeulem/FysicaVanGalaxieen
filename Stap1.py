@@ -117,7 +117,7 @@ def BaanInt(apo, peri, stapjes=80):
     # die zowel rond het centrum gaan als radiele bewegen
 
     # De standaard banen: 0<peri, 0<apo en L>0
-    if L > 10**(-5):
+    if 0 < peri != apo:
         # De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt
         # van de snelheid dus is v_r = 0
         f0 = [apo, 0, 0]
@@ -313,7 +313,7 @@ def rad_distr(r_max, i=100):
 
 
 for element in rad_distr(r_mass(0.99)):
-    print element
+    print (element)
 
 # t, radius, hoek, snelheid = BaanInt(0, 0)
 # plt.plot(t, radius, 'b', label='radius(t)')
