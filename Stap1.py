@@ -5,14 +5,9 @@ from scipy.optimize import brentq
 import matplotlib.pyplot as plt
 
 from scipy import interpolate
+
+
 # eerste stap: grootheden
-
-
-# kleine range functie voor floats
-def frange(x, y, jump):
-    while x < y:
-        yield x
-        x += jump
 
 
 def density(radius):
@@ -53,7 +48,7 @@ def aperi(E, L):
     def f(r):
         return 2*E*r**3 + (2*E - 2)*r**2 + r*L**2 + 4 + L**2
     if L == 0:
-        aperi_list.append(int(0))
+        aperi_list.append(float(0.0))
         if E != 0:
             aperi_list.append((1-E)/E)
     else:
@@ -82,30 +77,14 @@ def perihelium(E, L):
     return min(aperium)
 
 
-def energie(ap, peri=0):
-    if not peri:
-        if ap == 0:
-            return 0
-        else:
-            E = (BindPot(ap) - mass(ap)/(2*ap))
-            return E
-    else:
-        a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1], [2*(peri**3)+2*(peri**2), peri + 1]])
-        b = numpy.array([2*(ap**2), 2*(peri**2)])
-        return(numpy.linalg.solve(a, b)[0])
+def energie(ap, peri):
+    return((-(peri**2))/(ap + peri)*(ap + 1)*(peri + 1) + 1/(ap + 1))
 
 
-def draaimoment(ap, peri=0):
-    if not peri:
-        return ((mass(ap)*ap)**(0.5))
-    elif ap != peri:
-        a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1], [2*(peri**3)+2*(peri**2), peri + 1]])
-        b = numpy.array([2*(ap**2), 2*(peri**2)])
-        return(numpy.sqrt(numpy.linalg.solve(a, b)[1]))
-    else:
-        a = numpy.array([2*(ap**3)+2*(ap**2), ap+1])
-        b = numpy.array([2*(ap**2)])
-        return(numpy.sqrt(numpy.linalg.solve(a, b)[1]))
+def draaimoment(ap, peri):
+    if ap == peri == 0:
+        return 0
+    return numpy.sqrt((2*(ap**2)*(peri**2))/(ap + peri)*(ap + 1)*(peri + 1))
 
 # Radiele periode volledig bepaald door peri-en apoheleum
 # want men kan via peri en apo de energie en draaimoment bepalen
@@ -240,8 +219,8 @@ def ListELcouples(r_max):
     E = []
     L = []
     for r in numpy.linspace(r_max/1000, r_max, 1000):
-        orb_mom = draaimoment(r)
-        e = energie(r)
+        orb_mom = draaimoment(r, r)
+        e = energie(r, r)
         E.insert(0, e)
         L.insert(0, orb_mom)
         # E moet in stijgende volgorde zijn voor de komende plotfunctie
@@ -261,7 +240,7 @@ def findL(E):
     couples = ListELcouples(r_max)
     E_list = couples[0]
     L_list = couples[1]
-    spl = interpolate.UnivariateSpline(E_list, L_list, s=0.001)
+    spl = interpolate.UnivariateSpline(E_list, L_list, s=0)
     # plt.plot(numpy.arange(0, 1, 0.0001), spl(numpy.arange(0, 1, 0.0001)))
     # plt.plot(E_list, L_list)
     # plot neemt kwadratisch af naar 0, zoals het hoort
@@ -291,12 +270,11 @@ def mass_increase(r1, r2):
 
 
 def rad_distr(r_max, i=100):
-    i = 100
     # i is het aantal delen dat we de r_max opdelen
     interval = interval_r(r_mass(0.99), i)
     # een interval opgesteld van 0 tot r_max in 100 stukjes
     sterren_fractie = []
-    for e in numpy.linspace(0.005, 0.99, 20):
+    for e in numpy.linspace(0, 0.99, 20):
         # E gaat van 0 naar 1, delen we op in stapjes van 20
         # we hebben de L nodig vlak voor de volgende e (e + 1/20)
         for l in numpy.linspace(0, findL(e), 20):
@@ -304,8 +282,8 @@ def rad_distr(r_max, i=100):
             # bepaalde energie
             apo = aphelium(e, l)
             peri = perihelium(e, l)
-            baan_rad = BaanInt(apo, peri)[0]
-            baan_rad_half = baan_rad[1:len(baan_rad)/2]
+            baan_rad = BaanInt(apo, peri)[1]
+            baan_rad_half = baan_rad[:len(baan_rad)/2]
             # volgende code is erg afhankelijk van de resolutie van
             # baan_int en het interval
             # eerst zoeken wat de laagste waarde is van r in baan_rad_half
@@ -319,9 +297,9 @@ def rad_distr(r_max, i=100):
             k = 0
             for element in baan_rad_half:
                 # we beschouwen elk interval van de straal van de sterrenbaan
-                if element < interval[k+1]:
+                if element < interval[k]:
                     fractie[k] += 1/80
-                elif k < 100:
+                elif k < i:
                     k += 1
                     element = element
                     # nog eens opnieuw de lus proberen met hetzelfde element
@@ -334,7 +312,8 @@ def rad_distr(r_max, i=100):
     return sterren_fractie
 
 
-print(rad_distr(r_mass(0.99), 100))
+for element in rad_distr(r_mass(0.99)):
+    print element
 
 # t, radius, hoek, snelheid = BaanInt(0, 0)
 # plt.plot(t, radius, 'b', label='radius(t)')
