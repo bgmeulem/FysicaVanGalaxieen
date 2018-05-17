@@ -96,11 +96,14 @@ def T_rad(apo, peri):
     import scipy.integrate as integrate
     E = energie(apo, peri)
     L = draaimoment(apo, peri)
-# integrate.quad neemt enkel functie objecten of methoden aan
+    # integrate.quad neemt enkel functie objecten of methoden aan
 
     def functie(r):
         return 2 / (2*(-E + BindPot(r)) - (L**2 / r**2))**0.5
-    return abs(integrate.quad(functie, peri, apo)[0]) if peri != apo != 0 else numpy.pi*2*apo**2/L
+    if peri != apo != 0:
+        return abs(integrate.quad(functie, peri, apo)[0])
+    else:
+        return (numpy.pi*2*(apo**2))/L
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -116,22 +119,8 @@ def BaanInt(apo, peri, stapjes=80):
     # radiele oscillaties, sterren stil staand in het centrum en dan nog de banen
     # die zowel rond het centrum gaan als radiele bewegen
 
-    # De standaard banen: 0<peri, 0<apo en L>0
-    if L > 10**(-5):
-        # De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt
-        # van de snelheid dus is v_r = 0
-        f0 = [apo, 0, 0]
-
-        def baanvergelijkingen(f, t, L):
-            r, phi, v_r = f
-            dfdt = [v_r, L/(r**2), (((L**2)/(r**3)) + BindPotDer1(r))]
-            return dfdt
-        # Men zal een periode bekijken in gelijke stapjes
-        t = numpy.linspace(0, T_rad(peri, apo), stapjes)
-        oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
-
     #  ster staat stil in het centrum: peri=apo=o, L=0
-    elif peri == apo == 0:
+    if peri == apo == 0:
         # De ster staat stil en beweegt niet en heeft een periode die oneindig
         # groot is
         f0 = [0, 0, 0]
@@ -148,7 +137,7 @@ def BaanInt(apo, peri, stapjes=80):
         # periode
         # Hier zal enkel de hoek veranderen
         periode = T_rad(apo, peri)
-        f0 = [apo, 0, 0]
+        f0 = [apo + 10**(-8), 0, 0]
 
         def baanvergelijkingen(f, t, L):
             r, phi, v_r = f
@@ -157,12 +146,27 @@ def BaanInt(apo, peri, stapjes=80):
         t = numpy.linspace(0, periode, stapjes)
         oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
 
+    # De standaard banen: 0<peri, 0<apo en L>0
+    elif L > 10**(-5):
+        # De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt
+        # van de snelheid dus is v_r = 0
+        f0 = [apo + 10**(-8), 0, 0]
+        # integratie werkt niet op apo zelf, v*t = 0
+
+        def baanvergelijkingen(f, t, L):
+            r, phi, v_r = f
+            dfdt = [v_r, L/(r**2), (((L**2)/(r**3)) + BindPotDer1(r))]
+            return dfdt
+        # Men zal een periode bekijken in gelijke stapjes
+        t = numpy.linspace(0, T_rad(peri, apo), stapjes)
+        oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
+
     # De laatste beweging wordt opgesplitst in 2 delen nl. van apo naar centrum
     # en van centrum terug naar apo maar aan de andere kant van het centrum
     else:
         # Deel 1: van apo naar centrum
         periode = T_rad(apo, peri)/2
-        f0 = [apo, 0, 0]
+        f0 = [apo + 10**(-8), 0, 0]
 
         def baanvergelijkingen(f, t, L):
             r, phi, v_r = f
@@ -274,14 +278,15 @@ def rad_distr(r_max, i=100):
     interval = interval_r(r_mass(0.99), i)
     # een interval opgesteld van 0 tot r_max in 100 stukjes
     sterren_fractie = []
-    for e in numpy.linspace(0, 0.99, 20):
+    for e in numpy.linspace(0.0001, 0.99, 20):
         # E gaat van 0 naar 1, delen we op in stapjes van 20
         # we hebben de L nodig vlak voor de volgende e (e + 1/20)
-        for l in numpy.linspace(0, findL(e), 20):
+        # vreemde error bij e = 1, dus laten we dat vermijden
+        for l in numpy.linspace(0.0001, findL(e), 20):
             # Draaimoment bij cirkelbaan is steeds de maximale voor een
             # bepaalde energie
-            apo = aphelium(e, l)
-            peri = perihelium(e, l)
+            apo = aphelium(e, L)
+            peri = perihelium(e, L)
             baan_rad = BaanInt(apo, peri)[1]
             baan_rad_half = baan_rad[:len(baan_rad)/2]
             # volgende code is erg afhankelijk van de resolutie van
@@ -312,8 +317,13 @@ def rad_distr(r_max, i=100):
     return sterren_fractie
 
 
-for element in rad_distr(r_mass(0.99)):
-    print element
+print(interval_r(r_mass(0.99), 100))
+apo = aphelium(0.5, 12)
+peri = perihelium(0.5, 12)
+print(BaanInt(apo, peri)[1])
+distr = rad_distr(r_mass(0.99))
+for element in distr:
+    print(element)
 
 # t, radius, hoek, snelheid = BaanInt(0, 0)
 # plt.plot(t, radius, 'b', label='radius(t)')
