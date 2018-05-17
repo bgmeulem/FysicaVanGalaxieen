@@ -51,10 +51,7 @@ def aperi(E, L):
     aperi_list = []
 
     def f(r):
-        if L == 0:
-            return (E - BindPot(r))
-        else:
-            return (L**2)/(2*r**2) + E - BindPot(r)
+        return 2*E*r**3 + (2*E - 2)*r**2 + r*L**2 + 4 + L**2
     if L == 0:
         aperi_list.append(int(0))
         if E != 0:
@@ -66,8 +63,10 @@ def aperi(E, L):
             aperi_list.append(minimum)
             return aperi_list
         # geen cirkelbaan : 2 nulpunten
-        aperi_list.append(brentq(f, 10**(-20), minimum))
-        aperi_list.append(brentq(f, minimum, r_mass(0.99)))
+        roots = numpy.roots([2*E, 2*E - 2, L**2, L**2 + 4])
+        for element in roots:
+            if element > 0:
+                aperi_list.append(element)
     return aperi_list
 
 # Volgende functies geven minimum en maximum oplossing van 1.112
@@ -99,9 +98,13 @@ def energie(ap, peri=0):
 def draaimoment(ap, peri=0):
     if not peri:
         return ((mass(ap)*ap)**(0.5))
-    else:
+    elif ap != peri:
         a = numpy.array([[2*(ap**3)+2*(ap**2), ap+1], [2*(peri**3)+2*(peri**2), peri + 1]])
         b = numpy.array([2*(ap**2), 2*(peri**2)])
+        return(numpy.sqrt(numpy.linalg.solve(a, b)[1]))
+    else:
+        a = numpy.array([2*(ap**3)+2*(ap**2), ap+1])
+        b = numpy.array([2*(ap**2)])
         return(numpy.sqrt(numpy.linalg.solve(a, b)[1]))
 
 # Radiele periode volledig bepaald door peri-en apoheleum
@@ -293,7 +296,7 @@ def rad_distr(r_max, i=100):
     interval = interval_r(r_mass(0.99), i)
     # een interval opgesteld van 0 tot r_max in 100 stukjes
     sterren_fractie = []
-    for e in numpy.linspace(0, 0.9, 20):
+    for e in numpy.linspace(0.005, 0.99, 20):
         # E gaat van 0 naar 1, delen we op in stapjes van 20
         # we hebben de L nodig vlak voor de volgende e (e + 1/20)
         for l in numpy.linspace(0, findL(e), 20):
