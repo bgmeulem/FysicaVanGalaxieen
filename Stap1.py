@@ -46,7 +46,7 @@ def aperi(E, L):
     aperi_list = []
 
     def f(r):
-        return 2*E*r**3 + (2*E - 2)*r**2 + r*L**2 + 4 + L**2
+        return 2*E*r**3 + (2*E + 2)*r**2 - r*L**2 - L**2
     if L == 0:
         aperi_list.append(float(0.0))
         if E != 0:
@@ -58,10 +58,9 @@ def aperi(E, L):
             aperi_list.append(minimum)
             return aperi_list
         # geen cirkelbaan : 2 nulpunten
-        roots = numpy.roots([2*E, 2*E - 2, L**2, L**2 + 4])
-        for element in roots:
-            if element > 0:
-                aperi_list.append(element)
+        else:
+            aperi_list.append(brentq(f, -10**(-20), minimum))
+            aperi_list.append(brentq(f, minimum, r_mass(0.99)))
     return aperi_list
 
 # Volgende functies geven minimum en maximum oplossing van 1.112
@@ -69,12 +68,12 @@ def aperi(E, L):
 
 def aphelium(E, L):
     aperium = list(aperi(E, L))
-    return max(aperium)
+    return float(max(aperium))
 
 
 def perihelium(E, L):
     aperium = list(aperi(E, L))
-    return min(aperium)
+    return float(min(aperium))
 
 
 def energie(ap, peri):
@@ -82,9 +81,9 @@ def energie(ap, peri):
 
 
 def draaimoment(ap, peri):
-    if ap == peri == 0:
+    if peri == 0:
         return 0
-    return numpy.sqrt((2*(ap**2)*(peri**2))/(ap + peri)*(ap + 1)*(peri + 1))
+    return numpy.sqrt((2*(ap**2)*(peri**2))/((ap + peri)*(ap + 1)*(peri + 1)))
 
 # Radiele periode volledig bepaald door peri-en apoheleum
 # want men kan via peri en apo de energie en draaimoment bepalen
@@ -93,6 +92,7 @@ def draaimoment(ap, peri):
 # in deze functie zit ook nog de periode voor een cirkelbaan, dit om
 # de dingen wat te bundelen
 def T_rad(apo, peri):
+
     import scipy.integrate as integrate
     E = energie(apo, peri)
     L = draaimoment(apo, peri)
@@ -100,9 +100,14 @@ def T_rad(apo, peri):
 
     def functie(r):
         return 2 / (2*(-E + BindPot(r)) - (L**2 / r**2))**0.5
-    if peri != apo != 0:
-        return abs(integrate.quad(functie, peri, apo)[0])
-    else:
+
+    if peri != apo:
+        periode = abs(integrate.quad(functie, peri, apo)[0])
+        if peri == 0:
+            return 2*periode
+        else:
+            return periode
+    elif peri == apo:
         return (numpy.pi*2*(apo**2))/L
 
 # --------------------------------------------------------------------------- #
@@ -137,7 +142,7 @@ def BaanInt(apo, peri, stapjes=80):
         # periode
         # Hier zal enkel de hoek veranderen
         periode = T_rad(apo, peri)
-        f0 = [apo + 10**(-8), 0, 0]
+        f0 = [apo + 10**(-3), 0, 0]
 
         def baanvergelijkingen(f, t, L):
             r, phi, v_r = f
@@ -147,10 +152,10 @@ def BaanInt(apo, peri, stapjes=80):
         oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
 
     # De standaard banen: 0<peri, 0<apo en L>0
-    elif L > 10**(-5):
+    elif L > 0:
         # De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt
         # van de snelheid dus is v_r = 0
-        f0 = [apo + 10**(-8), 0, 0]
+        f0 = [apo + 10**(-3), 0, 0]
         # integratie werkt niet op apo zelf, v*t = 0
 
         def baanvergelijkingen(f, t, L):
@@ -166,7 +171,7 @@ def BaanInt(apo, peri, stapjes=80):
     else:
         # Deel 1: van apo naar centrum
         periode = T_rad(apo, peri)/2
-        f0 = [apo + 10**(-8), 0, 0]
+        f0 = [apo + 10**(-3), 0, 0]
 
         def baanvergelijkingen(f, t, L):
             r, phi, v_r = f
@@ -273,55 +278,42 @@ def mass_increase(r1, r2):
         return mass(r1)
 
 
-def rad_distr(r_max, i=100):
+def rad_distr_e(r_max, e, i=100):
+    # een radiele distributie voor 1 zekere e
+    # het straal-interval wordt standaard verdeeld in 100 stukjes
+    interval = numpy.linspace(0, r_mass(0.99), i)
+    rad_distr_E = []
+    for l in numpy.linspace(0, findL(e), 20):
+        # Draaimoment bij cirkelbaan is steeds de maximale voor een
+        # bepaalde energie
+        apo = aphelium(e, l)
+        peri = perihelium(e, l)
+        baan_rad = BaanInt(apo, peri)[1]
+        baan_rad_half = baan_rad[:len(baan_rad)/2]
+        # histogram verdeelt de radiële distributie in bins, deze bins
+        # worden bepaald door ons interval
+        fractie = numpy.histogram(baan_rad_half, bins=interval)[0]
+        # deze telt gewoon hoeveel stralen er in een bepaald r_interval
+        # zitten, dit dient nog genormeerd te worden zodat de som van
+        # alle bins de periode geeft:
+        fractie_norm = [x/len(baan_rad_half) for x in fractie]
+        rad_distr_E.append(fractie_norm)
+    # elke ster krijgt een lijst met de fractie van tijd dat ze
+    # doorbrengt in een bepaald r-interval (in i stukken opgedeeld)
+
+
+def rad_distr_tot(r_max, i=100):
     # i is het aantal delen dat we de r_max opdelen
-    interval = interval_r(r_mass(0.99), i)
     # een interval opgesteld van 0 tot r_max in 100 stukjes
-    sterren_fractie = []
-    for e in numpy.linspace(0.0001, 0.99, 20):
-        # E gaat van 0 naar 1, delen we op in stapjes van 20
-        # we hebben de L nodig vlak voor de volgende e (e + 1/20)
-        # vreemde error bij e = 1, dus laten we dat vermijden
-        for l in numpy.linspace(0.0001, findL(e), 20):
-            # Draaimoment bij cirkelbaan is steeds de maximale voor een
-            # bepaalde energie
-            apo = aphelium(e, L)
-            peri = perihelium(e, L)
-            baan_rad = BaanInt(apo, peri)[1]
-            baan_rad_half = baan_rad[:len(baan_rad)/2]
-            # volgende code is erg afhankelijk van de resolutie van
-            # baan_int en het interval
-            # eerst zoeken wat de laagste waarde is van r in baan_rad_half
-            # alvorens we vergelijken met interval
-            # we gaan ervan uit dat baan_rad_half geen element heeft groter dan
-            # r_max
-            # nu is baan_rad_half[0] sowieso minstens gelijk aan interval[i]
-            fractie = i*[0]
-            # elke ster krijgt een lijst met de fractie van tijd dat ze
-            # doorbrengt in een bepaald r-interval (in i stukken opgedeeld)
-            k = 0
-            for element in baan_rad_half:
-                # we beschouwen elk interval van de straal van de sterrenbaan
-                if element < interval[k]:
-                    fractie[k] += 1/80
-                elif k < i:
-                    k += 1
-                    element = element
-                    # nog eens opnieuw de lus proberen met hetzelfde element
-                    # anders is de lijst compleet
-            sterren_fractie.append(fractie)
-            # deze lijst wordt toegevoegd aan de totale lijst genaamd
-            # sterren_fractie. Elke 20 waarden komen overeen met 1 E-waarde
-            # en 20 verschillende L-waarden. Deze lijst zou 400 elementen
-            # moeten bevatten
-    return sterren_fractie
+    rad_distr_tot = []
+    for e in numpy.linspace(10**(-5), 0.99, 20):
+        rad_distr_tot.append(rad_distr_e(r_max, e, i))
+    return rad_distr_tot
 
+print(aphelium(0.1, 0.00001))
+print(BaanInt(aphelium(0.1, findL(0.1)), (0.1, findL(0.1)))[1])
 
-print(interval_r(r_mass(0.99), 100))
-apo = aphelium(0.5, 12)
-peri = perihelium(0.5, 12)
-print(BaanInt(apo, peri)[1])
-distr = rad_distr(r_mass(0.99))
+distr = rad_distr_tot(r_mass(0.99))
 for element in distr:
     print(element)
 
