@@ -45,9 +45,6 @@ def BindPotDer2(r):
 def aperi(E, L):
     aperi_list = []
 
-    def f(r):
-        return(2*E*(r**3) + (2*E - 2)*(r**2) + r*L**2 + L**2)
-
     if L < 10**(-4):
         # L is praktisch 0: ster oscilleert of zit stil
         aperi_list.append(float(0.0))
@@ -56,30 +53,23 @@ def aperi(E, L):
         else:  # ster zit stil
             aperi_list.append(float(0.0))
     else:  # L != 0: cirkelbaan of ellips
-        minimum = fmin(f, 0.01, disp=False)[0]
-        if L == findL(E):
-            # cirkelbaan
-            aperi_list.append(minimum)
-            return aperi_list
-        # geen cirkelbaan : 2 nulpunten
-        else:
-            perihelium = brentq(f, 0, minimum)
-            aphelium = brentq(f, minimum, r_mass(0.99))
-            aperi_list.append(perihelium)
-            aperi_list.append(aphelium)
+        oplossingen = list(numpy.roots([-2*E, -2*E - 2, L**2, L**2]))
+        for element in oplossingen:
+            # complexe en negatieve wortels filteren
+            if isinstance(element, float) and element > 0:
+                aperi_list.append(float(element))
+    aperi_list.sort()
     return aperi_list
 
 # Volgende functies geven minimum en maximum oplossing van 1.112
 
 
 def aphelium(E, L):
-    aperium = list(aperi(E, L))
-    return float(max(aperium))
+    return aperi(E, L)[-1]
 
 
 def perihelium(E, L):
-    aperium = list(aperi(E, L))
-    return float(min(aperium))
+    return aperi(E, L)[0]
 
 
 def energie(ap, peri):
@@ -105,10 +95,10 @@ def T_rad(apo, peri):
     # integrate.quad neemt enkel functie objecten of methoden aan
 
     def functie(r):
-        return 2 / (2*(-E + BindPot(r)) - (L**2 / r**2))**0.5
+        return 2*numpy.sqrt(1 / (2*(-E + BindPot(r)) - (L**2 / r**2)))
 
     if peri != apo:
-        periode = abs(integrate.quad(functie, peri, apo)[0])
+        periode = abs(integrate.quad(functie, apo, peri)[0])
         if peri == 0:
             return 2*periode
         else:
@@ -289,41 +279,40 @@ def rad_distr_e(r_max, e, i=100):
     # het straal-interval wordt standaard verdeeld in 100 stukjes
     interval = numpy.linspace(0, r_mass(0.99), i)
     rad_distr_E = []
-    for l in numpy.linspace(0.01, findL(e), 20):
+    e = 0.5
+    for l in numpy.linspace(0.001, findL(e), 20):
+        print("L = ", l)
         # Draaimoment bij cirkelbaan is steeds de maximale voor een
         # bepaalde energie
         apo = aphelium(e, l)
         peri = perihelium(e, l)
-        baan_rad = BaanInt(apo, peri)[1]
-        print(baan_rad)
-        baan_rad_half = baan_rad[:len(baan_rad)/2]
+        baan_rad = BaanInt(apo, peri, 100)[1]
+        baan_rad_half = baan_rad[:(len(baan_rad)/2)]
         # histogram verdeelt de radiële distributie in bins, deze bins
         # worden bepaald door ons interval
         fractie = numpy.histogram(baan_rad_half, bins=interval)[0]
+        print(baan_rad)
+        print(interval)
         # deze telt gewoon hoeveel stralen er in een bepaald r_interval
         # zitten, dit dient nog genormeerd te worden zodat de som van
         # alle bins de periode geeft:
-        fractie_norm = [x/len(baan_rad_half) for x in fractie]
-        rad_distr_E.append(fractie_norm)
+        rad_distr_E.append(fractie)
     # elke ster krijgt een lijst met de fractie van tijd dat ze
     # doorbrengt in een bepaald r-interval (in i stukken opgedeeld)
+    return rad_distr_E
 
 
 def rad_distr_tot(r_max, i=100):
     # i is het aantal delen dat we de r_max opdelen
     # een interval opgesteld van 0 tot r_max in 100 stukjes
     rad_distr_tot = []
-    for e in numpy.linspace(0.2, 0.9, 20):
+    # itereren over alle e
+    for e in numpy.linspace(0.1, 0.9, 20):
         rad_distr_tot.append(rad_distr_e(r_max, e, i))
     return rad_distr_tot
 
-# print(aphelium(0.1, 0.00001))
-# print(BaanInt(aphelium(0.1, findL(0.1)), (0.1, findL(0.1)))[1])
 
-
-
-for element in rad_distr_tot(r_mass(0.99)):
-    print(element)
+print(rad_distr_e(r_mass(0.99), 0.5))
 
 # t, radius, hoek, snelheid = BaanInt(0, 0)
 # plt.plot(t, radius, 'b', label='radius(t)')
