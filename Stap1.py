@@ -45,46 +45,41 @@ def BindPotDer2(r):
 def aperi(E, L):
     aperi_list = []
 
-    def f(r):
-        return 2*E*r**3 + (2*E - 2)*r**2 + r*L**2 + 4 + L**2
-    if L == 0:
+    if L < 10**(-4):
+        # L is praktisch 0: ster oscilleert of zit stil
         aperi_list.append(float(0.0))
-        if E != 0:
+        if E != 0:  # ster oscilleert
             aperi_list.append((1-E)/E)
-    else:
-        minimum = fmin(f, 10**(-20), disp=False)[0]
-        if L == findL(E):
-            # cirkelbaan
-            aperi_list.append(minimum)
-            return aperi_list
-        # geen cirkelbaan : 2 nulpunten
-        roots = numpy.roots([2*E, 2*E - 2, L**2, L**2 + 4])
-        for element in roots:
-            if element > 0:
-                aperi_list.append(element)
+        else:  # ster zit stil
+            aperi_list.append(float(0.0))
+    else:  # L != 0: cirkelbaan of ellips
+        oplossingen = list(numpy.roots([-2*E, -2*E - 2, L**2, L**2]))
+        for element in oplossingen:
+            # complexe en negatieve wortels filteren
+            if isinstance(element, float) and element > 0:
+                aperi_list.append(float(element))
+    aperi_list.sort()
     return aperi_list
 
 # Volgende functies geven minimum en maximum oplossing van 1.112
 
 
 def aphelium(E, L):
-    aperium = list(aperi(E, L))
-    return max(aperium)
+    return aperi(E, L)[-1]
 
 
 def perihelium(E, L):
-    aperium = list(aperi(E, L))
-    return min(aperium)
+    return aperi(E, L)[0]
 
 
 def energie(ap, peri):
-    return((-(peri**2))/(ap + peri)*(ap + 1)*(peri + 1) + 1/(ap + 1))
+    return((ap + peri + ap*peri)/((ap + peri)*(ap + 1)*(peri+1)))
 
 
 def draaimoment(ap, peri):
-    if ap == peri == 0:
+    if ap == 0:
         return 0
-    return numpy.sqrt((2*(ap**2)*(peri**2))/(ap + peri)*(ap + 1)*(peri + 1))
+    return numpy.sqrt((2*(ap**2)*(peri**2))/((ap + peri)*(ap + 1)*(peri + 1)))
 
 # Radiele periode volledig bepaald door peri-en apoheleum
 # want men kan via peri en apo de energie en draaimoment bepalen
@@ -93,14 +88,23 @@ def draaimoment(ap, peri):
 # in deze functie zit ook nog de periode voor een cirkelbaan, dit om
 # de dingen wat te bundelen
 def T_rad(apo, peri):
+
     import scipy.integrate as integrate
     E = energie(apo, peri)
     L = draaimoment(apo, peri)
-# integrate.quad neemt enkel functie objecten of methoden aan
+    # integrate.quad neemt enkel functie objecten of methoden aan
 
     def functie(r):
-        return 2 / (2*(-E + BindPot(r)) - (L**2 / r**2))**0.5
-    return abs(integrate.quad(functie, peri, apo)[0]) if peri != apo != 0 else numpy.pi*2*apo**2/L
+        return 2*numpy.sqrt(1 / (2*(-E + BindPot(r)) - (L**2 / r**2)))
+
+    if peri != apo:
+        periode = abs(integrate.quad(functie, apo, peri)[0])
+        if peri == 0:
+            return 2*periode
+        else:
+            return periode
+    elif peri == apo:
+        return (numpy.pi*2*(apo**2))/L
 
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -116,6 +120,7 @@ def BaanInt(apo, peri, stapjes=80):
     # radiele oscillaties, sterren stil staand in het centrum en dan nog de banen
     # die zowel rond het centrum gaan als radiele bewegen
 
+<<<<<<< HEAD
     # De standaard banen: 0<peri, 0<apo en L>0
     if 0 < peri != apo:
         # De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt
@@ -130,8 +135,10 @@ def BaanInt(apo, peri, stapjes=80):
         t = numpy.linspace(0, T_rad(peri, apo), stapjes)
         oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
 
+=======
+>>>>>>> b12377289288ab74f20bf2e64313a7804193a9f7
     #  ster staat stil in het centrum: peri=apo=o, L=0
-    elif peri == apo == 0:
+    if peri == apo == 0:
         # De ster staat stil en beweegt niet en heeft een periode die oneindig
         # groot is
         f0 = [0, 0, 0]
@@ -148,7 +155,7 @@ def BaanInt(apo, peri, stapjes=80):
         # periode
         # Hier zal enkel de hoek veranderen
         periode = T_rad(apo, peri)
-        f0 = [apo, 0, 0]
+        f0 = [apo + 10**(-3), 0, 0]
 
         def baanvergelijkingen(f, t, L):
             r, phi, v_r = f
@@ -157,12 +164,27 @@ def BaanInt(apo, peri, stapjes=80):
         t = numpy.linspace(0, periode, stapjes)
         oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
 
+    # De standaard banen: 0<peri, 0<apo en L>0
+    elif L > 0:
+        # De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt
+        # van de snelheid dus is v_r = 0
+        f0 = [apo + 10**(-3), 0, 0]
+        # integratie werkt niet op apo zelf, v*t = 0
+
+        def baanvergelijkingen(f, t, L):
+            r, phi, v_r = f
+            dfdt = [v_r, L/(r**2), (((L**2)/(r**3)) + BindPotDer1(r))]
+            return dfdt
+        # Men zal een periode bekijken in gelijke stapjes
+        t = numpy.linspace(0, T_rad(peri, apo), stapjes)
+        oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
+
     # De laatste beweging wordt opgesplitst in 2 delen nl. van apo naar centrum
     # en van centrum terug naar apo maar aan de andere kant van het centrum
     else:
         # Deel 1: van apo naar centrum
         periode = T_rad(apo, peri)/2
-        f0 = [apo, 0, 0]
+        f0 = [apo + 10**(-3), 0, 0]
 
         def baanvergelijkingen(f, t, L):
             r, phi, v_r = f
@@ -269,10 +291,38 @@ def mass_increase(r1, r2):
         return mass(r1)
 
 
-def rad_distr(r_max, i=100):
+def rad_distr_e(r_max, e, i=100):
+    # een radiele distributie voor 1 zekere e
+    # het straal-interval wordt standaard verdeeld in 100 stukjes
+    interval = numpy.linspace(0, r_mass(0.99), i)
+    rad_distr_E = []
+    e = 0.5
+    for l in numpy.linspace(0.001, findL(e), 20):
+        print("L = ", l)
+        # Draaimoment bij cirkelbaan is steeds de maximale voor een
+        # bepaalde energie
+        apo = aphelium(e, l)
+        peri = perihelium(e, l)
+        baan_rad = BaanInt(apo, peri, 100)[1]
+        baan_rad_half = baan_rad[:(len(baan_rad)/2)]
+        # histogram verdeelt de radiële distributie in bins, deze bins
+        # worden bepaald door ons interval
+        fractie = numpy.histogram(baan_rad_half, bins=interval)[0]
+        print(baan_rad)
+        print(interval)
+        # deze telt gewoon hoeveel stralen er in een bepaald r_interval
+        # zitten, dit dient nog genormeerd te worden zodat de som van
+        # alle bins de periode geeft:
+        rad_distr_E.append(fractie)
+    # elke ster krijgt een lijst met de fractie van tijd dat ze
+    # doorbrengt in een bepaald r-interval (in i stukken opgedeeld)
+    return rad_distr_E
+
+
+def rad_distr_tot(r_max, i=100):
     # i is het aantal delen dat we de r_max opdelen
-    interval = interval_r(r_mass(0.99), i)
     # een interval opgesteld van 0 tot r_max in 100 stukjes
+<<<<<<< HEAD
     sterren_fractie = []
     for e in numpy.linspace(0, 0.99, 20):
         # E gaat van 0 naar 1, delen we op in stapjes van 20
@@ -314,6 +364,16 @@ def rad_distr(r_max, i=100):
 
 for element in rad_distr(r_mass(0.99)):
     print (element)
+=======
+    rad_distr_tot = []
+    # itereren over alle e
+    for e in numpy.linspace(0.1, 0.9, 20):
+        rad_distr_tot.append(rad_distr_e(r_max, e, i))
+    return rad_distr_tot
+
+
+print(rad_distr_e(r_mass(0.99), 0.5))
+>>>>>>> b12377289288ab74f20bf2e64313a7804193a9f7
 
 # t, radius, hoek, snelheid = BaanInt(0, 0)
 # plt.plot(t, radius, 'b', label='radius(t)')
