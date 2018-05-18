@@ -2,9 +2,10 @@ import numpy
 from scipy.integrate import odeint
 from scipy.optimize import fmin
 from scipy.optimize import brentq
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 from scipy import interpolate
+from backports.configparser.helpers import str
 
 
 # eerste stap: grootheden
@@ -73,7 +74,7 @@ def perihelium(E, L):
 
 
 def energie(ap, peri):
-    return((ap + peri + ap*peri)/((ap + peri)*(ap + 1)*(peri+1)))
+    return((ap + peri + ap*peri)/((ap + peri)*(ap + 1)*(peri+1))) if ap > 0 else 1
 
 
 def draaimoment(ap, peri):
@@ -120,7 +121,6 @@ def BaanInt(apo, peri, stapjes=80):
     # radiele oscillaties, sterren stil staand in het centrum en dan nog de banen
     # die zowel rond het centrum gaan als radiele bewegen
 
-<<<<<<< HEAD
     # De standaard banen: 0<peri, 0<apo en L>0
     if 0 < peri != apo:
         # De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt
@@ -135,8 +135,6 @@ def BaanInt(apo, peri, stapjes=80):
         t = numpy.linspace(0, T_rad(peri, apo), stapjes)
         oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
 
-=======
->>>>>>> b12377289288ab74f20bf2e64313a7804193a9f7
     #  ster staat stil in het centrum: peri=apo=o, L=0
     if peri == apo == 0:
         # De ster staat stil en beweegt niet en heeft een periode die oneindig
@@ -226,21 +224,20 @@ def BaanInt(apo, peri, stapjes=80):
 
 # een functie die de r geeft bij een gegeven massa, uitgedrukt in decimalen
 # Totale massa is 1
-# Dus bij 99% van de totale massa is n = 0.99
+# Dus bij 99,9% van de totale massa is n = 0.999
 
 
 def r_mass(n):
     r_half = 1 + 2**0.5
     r_max = (((2*n)**0.5)*r_half) / (1 + (1 - (2*n)**0.5)*r_half)
-    # bij M = 0.99 is dit ongeveer 198.5
+    # bij M = 0.999 is dit ongeveer 1998.5
     return r_max
 
-
 def ListELcouples(r_max):
-    r_max = r_mass(0.99)
+    r_max = r_mass(0.999)
     E = []
     L = []
-    for r in numpy.linspace(r_max/1000, r_max, 1000):
+    for r in numpy.linspace(0, r_max, 10000):
         orb_mom = draaimoment(r, r)
         e = energie(r, r)
         E.insert(0, e)
@@ -256,9 +253,9 @@ def ListELcouples(r_max):
 # print(draaimoment(100))
 # print(energie(100))
 
-
+#deze functie geldt enkel om het draaimoment te vinden van cirkelbanen
 def findL(E):
-    r_max = r_mass(0.99)  # 99% van de totale massa wordt beschouwd
+    r_max = r_mass(0.999)  # 99.9% van de totale massa wordt beschouwd
     couples = ListELcouples(r_max)
     E_list = couples[0]
     L_list = couples[1]
@@ -267,7 +264,6 @@ def findL(E):
     # plt.plot(E_list, L_list)
     # plot neemt kwadratisch af naar 0, zoals het hoort
     return spl.__call__(E)  # returnt de waarde van de fit op positie E
-
 # --------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 # Stap 5: interval 0:r_max opdelen in gelijke intervallen
@@ -276,13 +272,7 @@ def findL(E):
 
 
 def interval_r(r_max, n):
-    r_part = []
-    i = 0
-    while i <= r_max:
-        r_part.append(i)
-        i += r_max/n
-    return r_part
-
+    return numpy.linspace(0,r_max,n)
 
 def mass_increase(r1, r2):
     if r1:
@@ -290,13 +280,12 @@ def mass_increase(r1, r2):
     else:
         return mass(r1)
 
-
+print( numpy.linspace(0, r_mass(0.999), 100))
 def rad_distr_e(r_max, e, i=100):
     # een radiele distributie voor 1 zekere e
     # het straal-interval wordt standaard verdeeld in 100 stukjes
-    interval = numpy.linspace(0, r_mass(0.99), i)
+    interval = numpy.linspace(0, r_mass(0.999), i)
     rad_distr_E = []
-    e = 0.5
     for l in numpy.linspace(0.001, findL(e), 20):
         print("L = ", l)
         # Draaimoment bij cirkelbaan is steeds de maximale voor een
@@ -304,12 +293,10 @@ def rad_distr_e(r_max, e, i=100):
         apo = aphelium(e, l)
         peri = perihelium(e, l)
         baan_rad = BaanInt(apo, peri, 100)[1]
-        baan_rad_half = baan_rad[:(len(baan_rad)/2)]
+        baan_rad_half = baan_rad[:(len(baan_rad)//2)]
         # histogram verdeelt de radiële distributie in bins, deze bins
         # worden bepaald door ons interval
         fractie = numpy.histogram(baan_rad_half, bins=interval)[0]
-        print(baan_rad)
-        print(interval)
         # deze telt gewoon hoeveel stralen er in een bepaald r_interval
         # zitten, dit dient nog genormeerd te worden zodat de som van
         # alle bins de periode geeft:
@@ -317,14 +304,13 @@ def rad_distr_e(r_max, e, i=100):
     # elke ster krijgt een lijst met de fractie van tijd dat ze
     # doorbrengt in een bepaald r-interval (in i stukken opgedeeld)
     return rad_distr_E
-
+print(findL(0))
 
 def rad_distr_tot(r_max, i=100):
     # i is het aantal delen dat we de r_max opdelen
     # een interval opgesteld van 0 tot r_max in 100 stukjes
-<<<<<<< HEAD
     sterren_fractie = []
-    for e in numpy.linspace(0, 0.99, 20):
+    for e in numpy.linspace(0, 0.999, 20):
         # E gaat van 0 naar 1, delen we op in stapjes van 20
         # we hebben de L nodig vlak voor de volgende e (e + 1/20)
         for l in numpy.linspace(0, findL(e), 20):
@@ -362,18 +348,17 @@ def rad_distr_tot(r_max, i=100):
     return sterren_fractie
 
 
-for element in rad_distr(r_mass(0.99)):
-    print (element)
-=======
-    rad_distr_tot = []
+    for element in rad_distr(r_mass(0.999)):
+        print (element)
+        rad_distr_tot = []
     # itereren over alle e
     for e in numpy.linspace(0.1, 0.9, 20):
         rad_distr_tot.append(rad_distr_e(r_max, e, i))
     return rad_distr_tot
 
 
-print(rad_distr_e(r_mass(0.99), 0.5))
->>>>>>> b12377289288ab74f20bf2e64313a7804193a9f7
+#print(rad_distr_e(r_mass(0.999), 0.5))
+
 
 # t, radius, hoek, snelheid = BaanInt(0, 0)
 # plt.plot(t, radius, 'b', label='radius(t)')
