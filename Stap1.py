@@ -47,6 +47,7 @@ def aperi(E, L):
 
     def f(r):
         return(2*E*(r**3) + (2*E - 2)*(r**2) + r*L**2 + L**2)
+
     if L < 10**(-4):
         # L is praktisch 0: ster oscilleert of zit stil
         aperi_list.append(float(0.0))
@@ -55,15 +56,17 @@ def aperi(E, L):
         else:  # ster zit stil
             aperi_list.append(float(0.0))
     else:  # L != 0: cirkelbaan of ellips
-        minimum = fmin(f, 10**(-5), xtol=0.000001, disp=False)[0]
+        minimum = fmin(f, 0.01, disp=False)[0]
         if L == findL(E):
             # cirkelbaan
             aperi_list.append(minimum)
             return aperi_list
         # geen cirkelbaan : 2 nulpunten
         else:
-            aperi_list.append(brentq(f, 10**(-6), minimum))
-            aperi_list.append(brentq(f, minimum, r_mass(0.99)))
+            perihelium = brentq(f, 0, minimum)
+            aphelium = brentq(f, minimum, r_mass(0.99))
+            aperi_list.append(perihelium)
+            aperi_list.append(aphelium)
     return aperi_list
 
 # Volgende functies geven minimum en maximum oplossing van 1.112
@@ -286,12 +289,13 @@ def rad_distr_e(r_max, e, i=100):
     # het straal-interval wordt standaard verdeeld in 100 stukjes
     interval = numpy.linspace(0, r_mass(0.99), i)
     rad_distr_E = []
-    for l in numpy.linspace(0, findL(e) - 10**(-2), 20):
+    for l in numpy.linspace(0.01, findL(e), 20):
         # Draaimoment bij cirkelbaan is steeds de maximale voor een
         # bepaalde energie
         apo = aphelium(e, l)
         peri = perihelium(e, l)
         baan_rad = BaanInt(apo, peri)[1]
+        print(baan_rad)
         baan_rad_half = baan_rad[:len(baan_rad)/2]
         # histogram verdeelt de radiële distributie in bins, deze bins
         # worden bepaald door ons interval
@@ -309,7 +313,7 @@ def rad_distr_tot(r_max, i=100):
     # i is het aantal delen dat we de r_max opdelen
     # een interval opgesteld van 0 tot r_max in 100 stukjes
     rad_distr_tot = []
-    for e in numpy.linspace(10**(-1), 0.9, 20):
+    for e in numpy.linspace(0.2, 0.9, 20):
         rad_distr_tot.append(rad_distr_e(r_max, e, i))
     return rad_distr_tot
 
@@ -317,15 +321,8 @@ def rad_distr_tot(r_max, i=100):
 # print(BaanInt(aphelium(0.1, findL(0.1)), (0.1, findL(0.1)))[1])
 
 
-plt.plot(ListELcouples(r_mass(0.99))[0], ListELcouples(r_mass(0.99))[1])
-print(findL(0.5))
-apo = aphelium(0.5, 0.1)
-peri = perihelium(0.5, 0.1)
-baan_rad = BaanInt(apo, peri)[1]
-print(baan_rad)
-print(findL(0.1))
-distr = rad_distr_tot(r_mass(0.99))
-for element in distr:
+
+for element in rad_distr_tot(r_mass(0.99)):
     print(element)
 
 # t, radius, hoek, snelheid = BaanInt(0, 0)
