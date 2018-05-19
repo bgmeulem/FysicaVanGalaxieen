@@ -7,7 +7,7 @@ from Stap2 import T_rad
 from numpy import pi
 
 
-def BaanInt(apo, peri, stapjes=80):
+def BaanInt(apo, peri, stapjes=1000):
     L = draaimoment(apo, peri)
     # stapjes moet een even getal zijn want bij radiele oscillatie wordt
     # dit in 2 gesplitst
@@ -20,10 +20,11 @@ def BaanInt(apo, peri, stapjes=80):
     if 0 < peri != apo:
         # De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt
         # van de snelheid dus is v_r = 0
-        f0 = [apo, 0, 0]
+        f0 = [apo, 0, -10**(-3)]
 
         def baanvergelijkingen(f, t, L):
             r, phi, v_r = f
+
             dfdt = [v_r, L/(r**2), (((L**2)/(r**3)) + BindPotDer1(r))]
             return dfdt
         # Men zal een periode bekijken in gelijke stapjes
@@ -48,7 +49,7 @@ def BaanInt(apo, peri, stapjes=80):
         # periode
         # Hier zal enkel de hoek veranderen
         periode = T_rad(apo, peri)
-        f0 = [apo + 10**(-3), 0, 0]
+        f0 = [apo, 0, 0]
 
         def baanvergelijkingen(f, t, L):
             r, phi, v_r = f
@@ -57,27 +58,12 @@ def BaanInt(apo, peri, stapjes=80):
         t = linspace(0, periode, stapjes)
         oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
 
-    # De standaard banen: 0<peri, 0<apo en L>0
-    elif L > 0:
-        # De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt
-        # van de snelheid dus is v_r = 0
-        f0 = [apo + 10**(-3), 0, 0]
-        # integratie werkt niet op apo zelf, v*t = 0
-
-        def baanvergelijkingen(f, t, L):
-            r, phi, v_r = f
-            dfdt = [v_r, L/(r**2), (((L**2)/(r**3)) + BindPotDer1(r))]
-            return dfdt
-        # Men zal een periode bekijken in gelijke stapjes
-        t = linspace(0, T_rad(peri, apo), stapjes)
-        oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
-
     # De laatste beweging wordt opgesplitst in 2 delen nl. van apo naar centrum
     # en van centrum terug naar apo maar aan de andere kant van het centrum
     else:
         # Deel 1: van apo naar centrum
         periode = T_rad(apo, peri)/2
-        f0 = [apo + 10**(-3), 0, 0]
+        f0 = [apo, 0, -10**(-3)]
 
         def baanvergelijkingen(f, t, L):
             r, phi, v_r = f
