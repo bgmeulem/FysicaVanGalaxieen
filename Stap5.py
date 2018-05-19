@@ -62,3 +62,6 @@ def rad_distr_tot(r_max, i):
         distr = list(rad_distr_e(r_max, e, i))
         sterren_fractie.append(distr)
     return sterren_fractie
+    # lijst met elementen [E], met E = [L] en L = een tuple van de radiële
+    # distibutie bij 1 E-L koppel. E is dus een lijst van verschillende L'en
+    # en sterren_fractie van verschillende E's
