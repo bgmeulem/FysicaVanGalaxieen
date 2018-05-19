@@ -15,18 +15,19 @@ def mass_increase(massfrac, i=100):
     r_max = r_mass(massfrac)
     interval = linspace(0, r_max, i)
     massincrease = []
-    for n in range(len(interval) - 1):
-        increase = mass(interval[i + 1]) - mass(interval[i])
+    for n in range(len(interval) - 2):
+        increase = mass(interval[n + 1]) - mass(interval[n])
         massincrease.append(increase)
+    massincrease.append(0.0)  # er komt 0 massa bij tussen r_max en ??
     return massincrease
 
 
 def rad_distr_e(mass_frac, e, i=100):
     # een radiele distributie voor 1 zekere e
     # het straal-interval wordt standaard verdeeld in 100 stukjes
-    interval = linspace(0, r_max, i)
+    interval = linspace(0, r_mass(mass_frac), i+1)
     rad_distr_E = list()
-    for l in linspace(findL(e, spl)/1000, findL(e, spl), 20):
+    for l in linspace(findL(e, spl)/1000, findL(e, spl), 21):
         # Draaimoment bij cirkelbaan is steeds de maximale voor een
         # bepaalde energie
         if len(aperi(e, l)) != 2:  # geen fysische oplossing
