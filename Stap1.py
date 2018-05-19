@@ -28,12 +28,3 @@ def BindPotDer1(r):
 def BindPotDer2(r):
     return 2/((r+1)**2)
 
-
-# t, radius, hoek, snelheid = BaanInt(0, 0)
-# plt.plot(t, radius, 'b', label='radius(t)')
-# plt.plot(t, hoek, 'g', label='angle(t)')
-# plt.plot(t, snelheid, 'r', label='radial velocity(t)')
-# plt.legend(loc='best')
-# plt.xlabel('t')
-# plt.grid()
-# plt.show()

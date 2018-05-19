@@ -3,7 +3,7 @@
 # Integraalruimte opdelen in grid (E_k, L_k)
 from numpy import linspace, histogram
 from Stap1 import mass
-from Stap4 import r_mass, fitL, findL
+import Stap4
 from Stap3 import BaanInt
 from Stap2 import aphelium, perihelium, T_rad
 import matplotlib.pyplot as plt
@@ -20,14 +20,13 @@ def mass_increase(r1, r2):
         return mass(r1)
 
 
-def rad_distr_e(r_max, e, i=100):
+def rad_distr_e(e,massa_fractie=0.99, i=100):
     # een radiele distributie voor 1 zekere e
     # het straal-interval wordt standaard verdeeld in 100 stukjes
-    r_max = r_mass(0.4)
+    r_max = Stap4.r_mass(massa_fractie)
     interval = linspace(0, r_max, i)
     rad_distr_E = list()
-    spl = fitL(e)
-    for l in linspace(0, findL(e, spl), 20):
+    for l in linspace(0, Stap4.findL(e), 20):
         # Draaimoment bij cirkelbaan is steeds de maximale voor een
         # bepaalde energie
         apo = aphelium(e, l)
@@ -51,14 +50,14 @@ def rad_distr_e(r_max, e, i=100):
     return rad_distr_E
 
 
-def rad_distr_tot(r_max, i):
+def rad_distr_tot(massa_fractie=0.99, i=100):
     # i is het aantal delen dat we de r_max opdelen
     # een interval opgesteld van 0 tot r_max in 100 stukjes
     sterren_fractie = list()
     # nu gaan we rad_distr_e sommeren ove e om zo een verdeling van sterren
     # te krijgen
     for e in linspace(0, 0.999, 20):
-        distr = list(rad_distr_e(r_max, e, i))
+        distr = list(rad_distr_e(e, massa_fractie, i))
         sterren_fractie.append(distr)
     return sterren_fractie
     # lijst met elementen [E], met E = [L] en L = een tuple van de radiële
