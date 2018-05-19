@@ -38,7 +38,7 @@ def ListELcouples(r_max):
 # print(energie(100))
 
 # deze functies gelden enkel om het draaimoment te vinden van cirkelbanen
-def fitL(E):
+def fitL():
     r_max = r_mass(0.999)  # 99.9% van de totale massa wordt beschouwd
     couples = ListELcouples(r_max)
     E_list = couples[0]
