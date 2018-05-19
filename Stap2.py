@@ -9,7 +9,6 @@ from numpy import pi
 
 def aperi(E, L):
     aperi_list = []
-
     if L < 10**(-4):
         # L is praktisch 0: ster oscilleert of zit stil
         aperi_list.append(float(0.0))
@@ -18,7 +17,7 @@ def aperi(E, L):
         else:  # ster zit stil
             aperi_list.append(float(0.0))
     else:  # L != 0: cirkelbaan of ellips
-        oplossingen = list(roots([-2*E, -2*E - 2, L**2, L**2]))
+        oplossingen = list(roots([2*E, 2*E - 2, L**2, L**2]))
         for element in oplossingen:
             # complexe en negatieve wortels filteren
             if isinstance(element, float) and element > 0:
