@@ -21,7 +21,7 @@ def ListELcouples(r_max):
     r_max = r_mass(0.999)
     E = []
     L = []
-    for r in linspace(0, r_max, 10000):
+    for r in linspace(0, r_max, 100000):
         orb_mom = draaimoment(r, r)
         e = energie(r, r)
         E.insert(0, e)

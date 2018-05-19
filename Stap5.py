@@ -28,11 +28,10 @@ def rad_distr_e(r_max, e, i=100):
     rad_distr_E = list()
     spl = fitL(e)
     for l in linspace(0, findL(e, spl), 20):
-        L = findL(e, spl)
         # Draaimoment bij cirkelbaan is steeds de maximale voor een
         # bepaalde energie
-        apo = aphelium(e, L)
-        peri = perihelium(e, L)
+        apo = aphelium(e, l)
+        peri = perihelium(e, l)
         baan_rad = BaanInt(apo, peri, 1000)[1]
         baan_rad_half = baan_rad[:(len(baan_rad)//2)]
         # histogram normaliseren op de halve radiële periode (tot op orde -16)
