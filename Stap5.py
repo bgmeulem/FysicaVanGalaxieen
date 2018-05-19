@@ -22,7 +22,7 @@ def mass_increase(r1, r2):
 def rad_distr_e(r_max, e, i=100):
     # een radiele distributie voor 1 zekere e
     # het straal-interval wordt standaard verdeeld in 100 stukjes
-    interval = linspace(0, r_mass(0.999), i)
+    interval = linspace(0, r_max, i)
     rad_distr_E = list()
     spl = fitL(e)
     for l in linspace(0.001, findL(e, spl), 20):
@@ -32,8 +32,8 @@ def rad_distr_e(r_max, e, i=100):
         peri = perihelium(e, l)
         baan_rad = BaanInt(apo, peri, 100)[1]
         baan_rad_half = baan_rad[:(len(baan_rad)//2)]
-        # histogram normaliseren op de halve radiële periode
-        weights = len(baan_rad_half)*[(T_rad(apo, peri))/len(baan_rad)]
+        # histogram normaliseren op de halve radiële periode (tot op orde -16)
+        weights = len(baan_rad_half)*[1.0/len(baan_rad_half)]
         # histogram verdeelt de radiële distributie in bins, deze bins
         # worden bepaald door ons interval
         fractie = tuple(histogram(baan_rad_half, interval, weights=weights)[0])
@@ -48,7 +48,6 @@ def rad_distr_e(r_max, e, i=100):
 def rad_distr_tot(r_max, i=100):
     # i is het aantal delen dat we de r_max opdelen
     # een interval opgesteld van 0 tot r_max in 100 stukjes
-    r_max = r_mass(0.999)
     sterren_fractie = list()
     # nu gaan we rad_distr_e sommeren ove e om zo een verdeling van sterren
     # te krijgen
@@ -58,4 +57,4 @@ def rad_distr_tot(r_max, i=100):
     return sterren_fractie
 
 
-print(rad_distr_tot(r_mass(0.999)))
+print(rad_distr_tot(20))
