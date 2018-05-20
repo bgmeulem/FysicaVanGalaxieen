@@ -17,11 +17,11 @@ def r_mass(n):
     return r_max
 
 
-def ListELcouples(r_max):
+def ListELcouples(r_max, res):
     r_max = r_mass(0.999)
     E = []
     L = []
-    for r in linspace(0, r_max, 100000):
+    for r in linspace(0, r_max, res):
         orb_mom = draaimoment(r, r)
         e = energie(r, r)
         E.insert(0, e)
@@ -38,9 +38,9 @@ def ListELcouples(r_max):
 # print(energie(100))
 
 # deze functies gelden enkel om het draaimoment te vinden van cirkelbanen
-def fitL():
+def fitL(res=1000):
     r_max = r_mass(0.999)  # 99.9% van de totale massa wordt beschouwd
-    couples = ListELcouples(r_max)
+    couples = ListELcouples(r_max, res)
     E_list = couples[0]
     L_list = couples[1]
     spl = UnivariateSpline(E_list, L_list, s=0)
