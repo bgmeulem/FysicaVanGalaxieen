@@ -27,4 +27,3 @@ def BindPotDer1(r):
 
 def BindPotDer2(r):
     return 2/((r+1)**2)
-

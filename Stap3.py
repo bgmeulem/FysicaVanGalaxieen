@@ -5,6 +5,7 @@ from numpy import linspace
 from scipy.integrate import odeint
 from Stap2 import T_rad
 from numpy import pi
+import matplotlib.pyplot as plt
 
 
 def BaanInt(apo, peri, stapjes=1000):
@@ -15,9 +16,8 @@ def BaanInt(apo, peri, stapjes=1000):
     # Er zijn 4 gevallen waarin onderscheid moet gemaakt worden nl. cirkelbanen
     # radiele oscillaties, sterren stilstaand in het centrum en dan nog de
     # banen die zowel rond het centrum gaan als radiele bewegen
-
     # De standaard banen: 0<peri, 0<apo en L>0
-    if 0.0 < peri and peri != apo:
+    if 0 < peri and peri != apo:
         # De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt
         # van de snelheid dus is v_r = 0
         f0 = [apo, 0, 0]
@@ -28,11 +28,10 @@ def BaanInt(apo, peri, stapjes=1000):
             dfdt = [v_r, L/(r**2), (((L**2)/(r**3)) + BindPotDer1(r))]
             return dfdt
         # Men zal een periode bekijken in gelijke stapjes
-        t = linspace(0, T_rad(peri, apo), stapjes)
+        t = linspace(0, T_rad(apo, peri), stapjes)
         oplossingen = odeint(baanvergelijkingen, f0, t, args=(L,))
-
     #  ster staat stil in het centrum: peri=apo=o, L=0
-    if peri == apo == 0:
+    elif peri == apo == 0:
         # De ster staat stil en beweegt niet en heeft een periode die oneindig
         # groot is
         f0 = [0, 0, 0]
@@ -98,4 +97,12 @@ def BaanInt(apo, peri, stapjes=1000):
         radiele_snelheid.append(oplossingen[element][2])
     return [tijd, radius, hoek, radiele_snelheid]
 
-print(BaanInt(1.5, 0.5)[1])
+
+test = BaanInt(1.5, 0.5, 1000)
+plt.plot(test[0], test[1], 'b', label='radius(t)')
+plt.plot(test[0], test[2], 'g', label='angle(t)')
+plt.plot(test[0], test[3], 'r', label='radial velocity(t)')
+plt.legend(loc='best')
+plt.xlabel('t')
+plt.grid()
+plt.show()
