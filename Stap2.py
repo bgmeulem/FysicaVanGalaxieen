@@ -3,8 +3,9 @@
 # apocentrumafstand
 from numpy import sqrt
 from numpy import roots
-from numpy import pi
 from Stap1 import BindPot
+from numpy import pi
+
 
 def aperi(E, L):
     aperi_list = []
@@ -66,5 +67,5 @@ def T_rad(apo, peri):
     if peri != apo:
         periode = abs(integrate.quad(functie, apo, peri)[0])
         return periode
-    elif peri == apo:
+    else:
         return (pi*2*(apo**2))/L
