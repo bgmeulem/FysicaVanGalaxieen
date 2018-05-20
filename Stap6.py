@@ -3,7 +3,6 @@
 
 from Stap5 import rad_distr_e, mass_increase
 import numpy as np
-from Stap4 import r_mass
 from scipy.optimize import leastsq
 
 
@@ -26,17 +25,18 @@ def m_k(massfrac, stapjes):
     for E in np.linspace(0.4, 0.9, stapjes):
         Edistr = (BijdrageL(E, massfrac, stapjes))
         MatrixE.append(list(Edistr))
-    v = [list(x) for x in zip(*MatrixE)]
+    v = np.array([list(x) for x in zip(*MatrixE)])
     # MatrixE is nu van de vorm [[Alle bijdrages van E1 voor 0-rmax],[E2],...]
     # MatrixE is van de vorm [[Alle E-bijdrages voor r0], [Alle voor r1], ...]
 
-    M = np.asarray(mass_increase(0.99))
+    M = (mass_increase(0.99, stapjes))
+    M.append(0)  # er komt nagenoeg 0 massa bij na r_max
+    # dit is om de dimensies te doen kloppen voor de matrixbewerking
     # uniforme verdelen als gok om te beginnen
-    mk_init = np.asarray(list(1.0/stapjes for i in range(stapjes)))
+    M = np.asarray(M)
+    mk_init = np.array(list(1.0/stapjes for i in range(stapjes)))
 
-    def f(mk, v, M):
-        return M - np.dot(v, mk)
-
-    m_optimal = leastsq(f, mk_init, args=(M, v))
-    print(m_optimal)
+    def f(mk, M, v):
+        return M - np.dot(mk, v)
+    m_optimal = leastsq(f, mk_init, args=(M, v))[0]
     return(m_optimal)
