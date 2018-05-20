@@ -17,10 +17,10 @@ def BaanInt(apo, peri, stapjes=1000):
     # banen die zowel rond het centrum gaan als radiele bewegen
 
     # De standaard banen: 0<peri, 0<apo en L>0
-    if 0 < peri != apo:
+    if 0 < peri and peri != apo:
         # De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt
         # van de snelheid dus is v_r = 0
-        f0 = [apo, 0, -10**(-3)]
+        f0 = [apo, 0, 0]
 
         def baanvergelijkingen(f, t, L):
             r, phi, v_r = f
@@ -97,3 +97,5 @@ def BaanInt(apo, peri, stapjes=1000):
         hoek.append(oplossingen[element][1])
         radiele_snelheid.append(oplossingen[element][2])
     return [tijd, radius, hoek, radiele_snelheid]
+
+print(BaanInt(1.5, 0.5)[1])
