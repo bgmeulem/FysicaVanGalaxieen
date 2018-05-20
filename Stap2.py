@@ -61,6 +61,7 @@ def T_rad(apo, peri):
     # integrate.quad neemt enkel functie objecten of methoden aan
 
     def functie(r):
+<<<<<<< HEAD
         return 2*sqrt(1 / (2*(-E + 1/(1 + r)) - (L**2 / r**2)))
 
     if peri != apo:
@@ -69,5 +70,12 @@ def T_rad(apo, peri):
             return periode
         else:
             return periode
+=======
+        return 2*sqrt(1 / (2*(-E + BindPot(r)) - (L**2 / r**2)))
+
+    if peri != apo:
+        periode = abs(integrate.quad(functie, apo, peri)[0])
+        return periode
+>>>>>>> 1a54d072d4f67e4d130ed22a71aa5b216c07697d
     else:
         return (pi*2*(apo**2))/L
