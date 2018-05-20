@@ -17,7 +17,7 @@ def BaanInt(apo, peri, stapjes=1000):
     # banen die zowel rond het centrum gaan als radiele bewegen
 
     # De standaard banen: 0<peri, 0<apo en L>0
-    if 0 < peri and peri != apo:
+    if 0.0 < peri and peri != apo:
         # De ster begint in zijn apohelium met hoek=0 en dat is een keerpunt
         # van de snelheid dus is v_r = 0
         f0 = [apo, 0, 0]
