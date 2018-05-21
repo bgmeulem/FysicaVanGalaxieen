@@ -51,23 +51,25 @@ def draaimoment(ap, peri):
 # Radiele periode volledig bepaald door peri-en apoheleum
 # want men kan via peri en apo de energie en draaimoment bepalen
 
-
 # in deze functie zit ook nog de periode voor een cirkelbaan, dit om
-# de dingen wat te bundelen
+# de dingen wat te bundelen en peri en apo die dicht bij elkaar liggen zijn quasi cirkelbanen
+#deze krijgen de periode van een cirkelbaan omdat de scipy.integrate.quad er anders moeilijk over doet
 def T_rad(apo, peri):
     import scipy.integrate as integrate
     E = energie(apo, peri)
+    
     L = draaimoment(apo, peri)
     # integrate.quad neemt enkel functie objecten of methoden aan
 
     def functie(r):
         return 2*sqrt(1 / (2*(-E + 1/(1 + r)) - (L**2 / r**2)))
-
-    if peri != apo:
-        periode = abs(integrate.quad(functie, apo, peri)[0])
-        if peri == 0:
-            return periode
-        else:
-            return periode
-    else:
+    #integrate.quad doet moeilijk als de integratiegrenzen dicht bij elkaar liggen
+    print([E, L])
+    #quasi cirkelbanen
+    if (apo-peri) < 0.02 and L != 0:
         return (pi*2*(apo**2))/L
+    else:
+        periode = abs(integrate.quad(functie, peri, apo, limit = 15000)[0])
+        return periode
+print([aphelium(0.98891010101010113, 0.0) , perihelium(0.98891010101010113, 0.0)])
+print(T_rad(0.000000011214264045408507, 0.0))

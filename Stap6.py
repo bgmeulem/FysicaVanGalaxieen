@@ -31,8 +31,6 @@ def m_k(massfrac, rinterval):
     # MatrixE is van de vorm [[Alle E-bijdrages voor r0], [Alle voor r1], ...]
 
     M = (mass_increase(0.99, rinterval))
-    M.append(0)  # er komt nagenoeg 0 massa bij na r_max
-    # dit is om de dimensies te doen kloppen voor de matrixbewerking
     # uniforme verdelen als gok om te beginnen
     M = np.asarray(M)
     # numpy.dot werkt liever met arrays
@@ -45,6 +43,6 @@ def m_k(massfrac, rinterval):
     return(m_optimal)
 
 
-print(m_k(0.99, 1000))
+print(m_k(0.99, 100))
 end = time.time()
 print(end-begin)

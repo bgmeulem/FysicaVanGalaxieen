@@ -51,7 +51,6 @@ def rad_distr_e(mass_frac, e, i=100):
     # is een tuple van de radiele verdeling bij een E-L koppel
     return rad_distr_E
 
-
 def rad_distr_tot(mass_frac, i):
     r_max = r_mass(mass_frac)
     # i is het aantal delen dat we de r_max opdelen
