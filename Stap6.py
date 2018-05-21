@@ -4,7 +4,9 @@
 from Stap5 import rad_distr_e, mass_increase
 import numpy as np
 from scipy.optimize import leastsq
+import time
 
+begin = time.time()
 
 def BijdrageL(E, mass_frac, rinterval):
     l_distr = rad_distr_e(mass_frac, E, rinterval)
@@ -41,3 +43,8 @@ def m_k(massfrac, rinterval):
         return M - np.dot(mk, v)
     m_optimal = leastsq(f, mk_init, args=(M, v))[0]
     return(m_optimal)
+
+
+print(m_k(0.99, 1000))
+end = time.time()
+print(end-begin)

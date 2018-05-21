@@ -3,7 +3,6 @@
 # apocentrumafstand
 from numpy import sqrt
 from numpy import roots
-from Stap1 import BindPot
 from numpy import pi
 
 
@@ -56,17 +55,19 @@ def draaimoment(ap, peri):
 # in deze functie zit ook nog de periode voor een cirkelbaan, dit om
 # de dingen wat te bundelen
 def T_rad(apo, peri):
-
     import scipy.integrate as integrate
     E = energie(apo, peri)
     L = draaimoment(apo, peri)
     # integrate.quad neemt enkel functie objecten of methoden aan
 
     def functie(r):
-        return 2*sqrt(1 / (2*(-E + BindPot(r)) - (L**2 / r**2)))
+        return 2*sqrt(1 / (2*(-E + 1/(1 + r)) - (L**2 / r**2)))
 
     if peri != apo:
         periode = abs(integrate.quad(functie, apo, peri)[0])
-        return periode
+        if peri == 0:
+            return periode
+        else:
+            return periode
     else:
         return (pi*2*(apo**2))/L

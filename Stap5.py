@@ -27,14 +27,14 @@ def rad_distr_e(mass_frac, e, i=100):
     # het straal-interval wordt standaard verdeeld in 100 stukjes
     interval = linspace(0, r_mass(mass_frac), i+1)
     rad_distr_E = list()
-    for l in linspace(findL(e, spl)/1000, findL(e, spl), 21):
+    for l in linspace(findL(e, spl)/1000, findL(e, spl), 41):
         # Draaimoment bij cirkelbaan is steeds de maximale voor een
         # bepaalde energie
         if len(aperi(e, l)) != 2:  # geen fysische oplossing
             break
         apo = aphelium(e, l)
         peri = perihelium(e, l)
-        baan_rad = BaanInt(apo, peri, 1000)[1]
+        baan_rad = BaanInt(apo, peri, 10000)[1]
         baan_rad_half = baan_rad[:(len(baan_rad)//2)]
         # histogram normaliseren op de halve radiele periode (tot op orde -16)
         weights = len(baan_rad_half)*[1.0/len(baan_rad_half)]
@@ -60,7 +60,7 @@ def rad_distr_tot(mass_frac, i):
     sterren_fractie = list()
     # nu gaan we rad_distr_e sommeren ove e om zo een verdeling van sterren
     # te krijgen
-    for e in linspace(0.4, 0.95, 20):
+    for e in linspace(0.4, 0.95, 40):
         distr = list(rad_distr_e(r_max, e, i))
         sterren_fractie.append(distr)
     return sterren_fractie
