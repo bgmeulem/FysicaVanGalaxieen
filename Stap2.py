@@ -7,6 +7,7 @@ from Stap1 import BindPot
 from numpy import pi
 
 
+
 def aperi(E, L):
     aperi_list = []
     if L < 10**(-4):
