@@ -15,12 +15,12 @@ def mass_increase(massfrac, i=100):
     r_max = r_mass(massfrac)
     interval = linspace(0, r_max, i)
     massincrease = []
-    for n in range(len(interval) - 2):
+    for n in range(len(interval) - 1):
         increase = mass(interval[n + 1]) - mass(interval[n])
         massincrease.append(increase)
     massincrease.append(0.0)  # er komt 0 massa bij tussen r_max en ??
     return massincrease
-
+print(sum(mass_increase(0.9, 10)))
 
 def rad_distr_e(mass_frac, e, i=100):
     # een radiele distributie voor 1 zekere e
