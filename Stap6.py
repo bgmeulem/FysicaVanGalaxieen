@@ -6,9 +6,8 @@ import numpy as np
 from scipy.optimize import leastsq
 import time
 
-begin = time.time()
 
-def BijdrageL(E, mass_frac, rinterval):
+def BijdrageL(E, mass_frac=0.9, rinterval=100):
     l_distr = rad_distr_e(mass_frac, E, rinterval)
     # een lijst van alle radiële distributies (elk afhankelijk van een L)
     # die bij 1 E horen
@@ -20,17 +19,17 @@ def BijdrageL(E, mass_frac, rinterval):
     # oftewel de bijdrage van 1 E (en alle L) op een stukje r_i
 
 
-def m_k(massfrac, rinterval):
+def m_k(massfrac=0.9, rinterval=100):
     MatrixE = []
     for E in np.linspace(0.0001, 0.999, rinterval):
         Edistr = (BijdrageL(E, massfrac, rinterval))
         MatrixE.append(list(Edistr))
 
     # MatrixE is nu van de vorm [[Alle bijdrages van E1 voor 0-rmax],[E2],...]
-    v = np.array([list(x) for x in zip(*MatrixE)])
+    v = np.array([list(x) for x in MatrixE])
     # MatrixE is van de vorm [[Alle E-bijdrages voor r0], [Alle voor r1], ...]
 
-    M = (mass_increase(0.99, rinterval))
+    M = (mass_increase(massfrac, rinterval))
     # uniforme verdelen als gok om te beginnen
     M = np.asarray(M)
     # numpy.dot werkt liever met arrays
@@ -43,6 +42,4 @@ def m_k(massfrac, rinterval):
     return(m_optimal)
 
 
-print(m_k(0.99, 100))
-end = time.time()
-print(end-begin)
+

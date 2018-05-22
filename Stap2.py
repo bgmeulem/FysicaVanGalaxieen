@@ -64,12 +64,9 @@ def T_rad(apo, peri):
     def functie(r):
         return 2*sqrt(1 / (2*(-E + 1/(1 + r)) - (L**2 / r**2)))
     #integrate.quad doet moeilijk als de integratiegrenzen dicht bij elkaar liggen
-    print([E, L])
     #quasi cirkelbanen
     if (apo-peri) < 0.02 and L != 0:
         return (pi*2*(apo**2))/L
     else:
         periode = abs(integrate.quad(functie, peri, apo, limit = 15000)[0])
         return periode
-print([aphelium(0.98891010101010113, 0.0) , perihelium(0.98891010101010113, 0.0)])
-print(T_rad(0.000000011214264045408507, 0.0))

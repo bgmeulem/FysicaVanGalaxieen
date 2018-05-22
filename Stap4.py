@@ -10,7 +10,7 @@ from Stap2 import draaimoment, energie
 # Dus bij 99,9% van de totale massa is n = 0.999
 
 
-def r_mass(n):
+def r_mass(n=0.9):
     r_half = 1 + 2**0.5
     r_max = (((2*n)**0.5)*r_half) / (1 + (1 - (2*n)**0.5)*r_half)
     # bij M = 0.999 is dit ongeveer 1998.5
