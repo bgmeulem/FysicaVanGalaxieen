@@ -39,7 +39,7 @@ def verkregen_massaverdeling (massfrac, stapjes=100):
     return straal_interval, mass_op_straal_list, straal_interval[1]
  
 #Om te plotten dient men gewoon de ''' tekens weg te doen en het programma te runnen
-#merk op dat dit even ken duren
+#merk op dat dit even kan duren
 '''
 m_k_list = m_k(0.99, 300)
 E_k_list = linspace(0.0001, 0.999, 300).tolist()
