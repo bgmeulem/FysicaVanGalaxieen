@@ -97,7 +97,7 @@ def BaanInt(apo, peri, stapjes=1000):
         radiele_snelheid.append(oplossingen[element][2])
     return [tijd, radius, hoek, radiele_snelheid]
 
-
+#om de de plot van de geintegreerde baan te zien verandert men de grenzen van BaanInt() hieronder
 test = BaanInt(1.5, 0)
 plt.plot(test[0], test[1], 'b', label='radius(t)')
 plt.plot(test[0], test[2], 'g', label='angle(t)')

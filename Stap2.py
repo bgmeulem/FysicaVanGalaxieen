@@ -64,7 +64,7 @@ def T_rad(apo, peri):
     def functie(r):
         return 2*sqrt(1 / (2*(-E + 1/(1 + r)) - (L**2 / r**2)))
     #integrate.quad doet moeilijk als de integratiegrenzen dicht bij elkaar liggen
-    #quasi cirkelbanen
+    #Voor peri en apo ongeveer gelijk kan men ze behandelen als cirkelbanen
     if (apo-peri) < 0.02 and L != 0:
         return (pi*2*(apo**2))/L
     else:
