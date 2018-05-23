@@ -5,14 +5,13 @@ from Stap5 import rad_distr_e
 from Stap4 import r_mass
 from numpy import linspace
 from Stap6 import BijdrageL
-import time
-def verwachte_massaverdeling (massfrac, stapjes = 100):
+def verwachte_massaverdeling (massfrac=0.9, stapjes = 100):
     massa_spreiding = mass_increase(massfrac, stapjes)
     r_max = r_mass(massfrac)
     straal_interval = linspace(0,r_max,stapjes).tolist()
     return straal_interval, massa_spreiding, straal_interval[1]
 
-def verkregen_massaverdeling (massfrac, stapjes=100):
+def verkregen_massaverdeling (massfrac=0.9, stapjes=100):
     #Bepalen van de r_i bins
     r_max = r_mass(massfrac)
     straal_interval = linspace(0,r_max,stapjes).tolist()

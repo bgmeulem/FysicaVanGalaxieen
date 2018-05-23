@@ -48,7 +48,7 @@ def draaimoment(ap, peri):
         return 0
     return sqrt((2*(ap**2)*(peri**2))/((ap + peri)*(ap + 1)*(peri + 1)))
 
-# Radiele periode volledig bepaald door peri-en apoheleum
+# Radiele periode volledig bepaald door peri-en aphelium
 # want men kan via peri en apo de energie en draaimoment bepalen
 
 # in deze functie zit ook nog de periode voor een cirkelbaan, dit om

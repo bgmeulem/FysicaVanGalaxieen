@@ -4,7 +4,6 @@
 from Stap5 import rad_distr_e, mass_increase
 import numpy as np
 from scipy.optimize import leastsq
-import time
 
 
 def BijdrageL(E, mass_frac=0.9, rinterval=100):
