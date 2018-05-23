@@ -6,11 +6,12 @@ from Stap1 import mass
 from Stap4 import r_mass, fitL, findL
 from Stap3 import BaanInt
 from Stap2 import aperi, aphelium, perihelium
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 spl = fitL()
 
-
+# berekenen van de toename van massa 
+# doorheen de intervallen [r_i, r_i+1]
 def mass_increase(massfrac, i=100):
     r_max = r_mass(massfrac)
     interval = linspace(0, r_max, i)
@@ -42,10 +43,6 @@ def rad_distr_e(mass_frac, e, i=100):
         # worden bepaald door ons interval
         fractie = list(histogram(baan_rad_half, interval, weights=weights)[0])
         rad_distr_E.append(fractie)
-        # plt.plot(tuple(histogram(baan_rad_half, interval, weights=weights)[1][:-1]), fractie)
-        # bovenstaande plot kan getest worden voor 1 E-L koppel
-        # run deze plot aub niet in iteratie met L'en en E's, dat gaat
-        # poepeloeri lang duren
     # nu is rad_distr_E een lijst met als elk element de radiele distributie
     # (op hun beurt tuples) bij 1 L-waarde. Elk element van rad_distr_E
     # heeft dus 20 elementen (We verdelen in 20 L-waarden) en elk element
