@@ -57,7 +57,7 @@ def rad_distr_tot(mass_frac, i):
     sterren_fractie = list()
     # nu gaan we rad_distr_e sommeren ove e om zo een verdeling van sterren
     # te krijgen
-    for e in linspace(0.4, 0.95, 40):
+    for e in linspace(0.0001, 0.999, 40):
         distr = list(rad_distr_e(r_max, e, i))
         sterren_fractie.append(distr)
     return sterren_fractie
