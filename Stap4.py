@@ -18,7 +18,6 @@ def r_mass(n=0.9):
 
 
 def ListELcouples(r_max, res):
-    r_max = r_mass(0.999)
     E = []
     L = []
     for r in linspace(0, r_max, res):
@@ -32,12 +31,9 @@ def ListELcouples(r_max, res):
     # returnt een lijst met als eerste element een lijst van alle E waarden
     # en als tweede de L-waarden
 
-
-# print(ListELcouples(200))
-# print(draaimoment(100))
-# print(energie(100))
-
 # deze functies gelden enkel om het draaimoment te vinden van cirkelbanen
+# deze fitL berekent apart de spline zodat dit in latere stappen een maal kan
+# gebeuren en uit die spline alle (L, E)-koppels gehaald kunnen worden
 def fitL(res=10000):
     r_max = r_mass(0.999)  # 99.9% van de totale massa wordt beschouwd
     couples = ListELcouples(r_max, res)
@@ -48,7 +44,4 @@ def fitL(res=10000):
 
 
 def findL(E, spl):
-    # plt.plot(numpy.arange(0, 1, 0.0001), spl(numpy.arange(0, 1, 0.0001)))
-    # plt.plot(E_list, L_list)
-    # plot neemt kwadratisch af naar 0, zoals het hoort
     return spl.__call__(E)  # returnt de waarde van de fit op positie E
