@@ -28,7 +28,7 @@ def rad_distr_e(mass_frac, e, i=100):
     interval = linspace(0, r_mass(mass_frac), i+1)
     rad_distr_E = list()
     
-    for l in linspace(findL(e, spl)/1000, findL(e, spl), 41):
+    for l in linspace(findL(e, spl)/1000, findL(e, spl), 40):
         # Draaimoment bij cirkelbaan is steeds de maximale voor een
         # bepaalde energie
         if len(aperi(e, l)) != 2:  # geen fysische oplossing
@@ -45,7 +45,7 @@ def rad_distr_e(mass_frac, e, i=100):
         rad_distr_E.append(fractie)
     # nu is rad_distr_E een lijst met als elk element de radiele distributie
     # (op hun beurt tuples) bij 1 L-waarde. Elk element van rad_distr_E
-    # heeft dus 20 elementen (We verdelen in 20 L-waarden) en elk element
+    # heeft dus 40 elementen (We verdelen in 40 L-waarden) en elk element
     # is een tuple van de radiele verdeling bij een E-L koppel
     
     return rad_distr_E
