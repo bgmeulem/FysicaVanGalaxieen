@@ -27,19 +27,16 @@ def m_k(massfrac=0.9, rinterval=100):
 
     # MatrixE is nu van de vorm [[Alle bijdrages van E1 voor 0-rmax],[E2],...]
     v = np.array([list(x) for x in MatrixE])
-    # MatrixE is van de vorm [[Alle E-bijdrages voor r0], [Alle voor r1], ...]
-
+    # v is nu een array van lijsten van lijsten van de vorm [[Alle bijdrages van E1 voor 0-rmax],[E2],...]
     M = (mass_increase(massfrac, rinterval))
-    # uniforme verdelen als gok om te beginnen
+    # Dit is de theoretisch bepaalde Massatoenames tussen de verschillende intervallen
     M = np.asarray(M)
     # numpy.dot werkt liever met arrays
     mk_init = np.array(list(1.0/rinterval for i in range(rinterval)))
-    # Een uniforme verdeling als initiele schatting voor mk?
-
+    # Een uniforme verdeling als initiele schatting voor mk
+    
+    # hier gebeurt de optimalisatie via leastsquare
     def f(mk, M, v):
         return M - np.dot(mk, v)
     m_optimal = leastsq(f, mk_init, args=(M, v))[0]
     return(m_optimal)
-
-
-
