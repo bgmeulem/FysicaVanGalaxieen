@@ -98,7 +98,7 @@ def BaanInt(apo, peri, stapjes=1000):
     return [tijd, radius, hoek, radiele_snelheid]
 
 
-'''
+test = BaanInt(1.5, 0)
 plt.plot(test[0], test[1], 'b', label='radius(t)')
 plt.plot(test[0], test[2], 'g', label='angle(t)')
 plt.plot(test[0], test[3], 'r', label='radial velocity(t)')
@@ -106,4 +106,3 @@ plt.legend(loc='best')
 plt.xlabel('t')
 plt.grid()
 plt.show()
-'''

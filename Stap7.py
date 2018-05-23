@@ -38,19 +38,10 @@ def verkregen_massaverdeling (massfrac, stapjes=100):
             mass_op_straal_list[element] += (m_k_float * r_verdeling_van_E_k[element])
     return straal_interval, mass_op_straal_list, straal_interval[1]
  
-'''
-plt.plot(test[0], test[1], 'b', label='radius(t)')
-plt.plot(test[0], test[2], 'g', label='angle(t)')
-plt.plot(test[0], test[3], 'r', label='radial velocity(t)')
-plt.legend(loc='best')
-plt.xlabel('t')
-plt.grid()
-plt.show()
-'''
 
-m_k_list = m_k(0.9, 100)
-E_k_list = linspace(0.0001, 0.999, 100).tolist()
-plt.plot(m_k_list, E_k_list, 'b', label='m_k(E_k)')
+m_k_list = m_k(0.99, 300)
+E_k_list = linspace(0.0001, 0.999, 300).tolist()
+plt.plot(E_k_list, m_k_list, 'b', label='m_k(E_k)')
 plt.legend(loc='best')
 plt.xlabel('E_k')
 plt.grid()
@@ -58,9 +49,10 @@ plt.show()
 '''
 from matplotlib.pyplot import *
 #stapjes mag nie te groot worden, dit duurt al gigantisch lang
-tussenvar = verkregen_massaverdeling(0.9, stapjes = 100)
+tussenvar = verkregen_massaverdeling(0.99, stapjes = 400)
 for x in range(len(tussenvar)):
     tussenvar[0][x] += tussenvar[2]/2
 x,y,breedte = tussenvar[0], tussenvar[1], tussenvar[2]
 bar(x,y, width = breedte)
-show()'''
+show()
+'''
